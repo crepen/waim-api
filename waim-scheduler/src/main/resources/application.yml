@@ -74,4 +74,3 @@ logging:
     root: INFO
     com.waim: info
 
-

@@ -3,6 +3,8 @@ package com.waim.api.common.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.lettuce.core.ClientOptions;
+import io.lettuce.core.resource.ClientResources;
+import io.lettuce.core.resource.Delay;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +19,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 @Slf4j
@@ -32,21 +35,46 @@ public class RedisConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        log.info("[REDIS FACTORY] Connect Redis : {}:{}" , redisHost, redisPort);
 
-        // 1. 소켓 및 커넥션 타임아웃 설정 (2초)
+        log.info("[REDIS FACTORY] Connect Redis : {}:{}", redisHost, redisPort);
+
+        // 1. 재연결 지연 전략 설정 (ClientResources)
+        ClientResources resources = ClientResources.builder()
+                .reconnectDelay(Delay.exponential(
+                        Duration.ofMillis(100),
+                        Duration.ofSeconds(30),
+                        2,
+                        TimeUnit.MILLISECONDS)
+                )
+                .build();
+
+        resources.eventBus().get().subscribe(event -> {
+            if (event instanceof io.lettuce.core.event.connection.ConnectionActivatedEvent) {
+                log.info("[REDIS EVENT] Connect: {}", event);
+            } else if (event instanceof io.lettuce.core.event.connection.DisconnectedEvent) {
+                log.warn("[REDIS EVENT] Disconnect: {}", event);
+            } else if (event instanceof io.lettuce.core.event.connection.ReconnectFailedEvent) {
+                log.error("[REDIS EVENT] Failed retry connect: {}", event);
+            }
+        });
+
+        // 2. 소켓 옵션 설정
         SocketOptions socketOptions = SocketOptions.builder()
                 .connectTimeout(Duration.ofSeconds(1))
+                .keepAlive(true)
                 .build();
 
-        // 2. 재연결 전략 (2번 시도 후 중단은 기본적으로 어렵지만, 전체 타임아웃으로 제어)
+        // 3. 클라이언트 옵션 설정 (reconnectDelay 제외)
         ClientOptions clientOptions = ClientOptions.builder()
                 .socketOptions(socketOptions)
+                .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
                 .build();
 
+        // 4. ClientResources와 ClientOptions를 통합 설정
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                .commandTimeout(Duration.ofSeconds(2)) // 명령어 실행 타임아웃 2초
+                .clientResources(resources) // 여기서 재연결 전략 주입
                 .clientOptions(clientOptions)
+                .commandTimeout(Duration.ofSeconds(2))
                 .build();
 
         RedisStandaloneConfiguration serverConfig = new RedisStandaloneConfiguration();
