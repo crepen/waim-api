@@ -1,0 +1,52 @@
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/libraries/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/shelf/
+.idea/dictionaries/
+.idea/modules/
+*.iws
+*.iml
+*.ipr
+out/
+
+
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+/.idea/dataSources/
+/.idea/dataSources.local.xml
+/.idea/inspectionProfiles/Project_Default.xml
+
+
+logs
+
+
+# Docker Compose Local env
+./.env.docker.local

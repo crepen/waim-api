@@ -1,0 +1,120 @@
+services:
+  waim-api:
+    container_name: waim-api
+    image: nexus.crepen.kro.kr/waim/api
+    environment:
+      - SPRING_PROFILES_ACTIVE=${WAIM_SPRING_PROFILE:-prod}
+      - SPRING_THREADS_VIRTUAL_ENABLED=true
+      # REDIS Conn
+      - WAIM_REDIS_HOST=${WAIM_REDIS_HOST}
+      - WAIM_REDIS_PORT=${WAIM_REDIS_PORT}
+      - WAIM_REDIS_PASSWORD=${WAIM_REDIS_PASSWORD_ENC}
+      # DATABASE
+      - WAIM_DB_URL_ENC=${WAIM_DB_URL_ENC}
+      - WAIM_DB_USERNAME_ENC=${WAIM_DB_USERNAME_ENC}
+      - WAIM_DB_PASSWORD_ENC=${WAIM_DB_PASSWORD_ENC}
+      # JASYPT
+      - WAIM_JASYPT_PASSWORD=${WAIM_JASYPT_PASSWORD}
+    volumes:
+      - ${WAIM_API_VOLUME_LOG:-/app/docker/volume/waim/api/logs}:/application/logs
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - crepen-waim-network
+      - crepen-mariadb-network
+    depends_on:
+      waim-redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f -s http://localhost:8080/api/system/status || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+
+  waim-scheduler:
+    container_name: waim-scheduler
+    image: nexus.crepen.kro.kr/waim/scheduler
+    environment:
+      - SPRING_PROFILES_ACTIVE=${WAIM_SPRING_PROFILE:-prod}
+      - SPRING_THREADS_VIRTUAL_ENABLED=true
+      # REDIS Conn
+      - WAIM_REDIS_HOST=${WAIM_REDIS_HOST}
+      - WAIM_REDIS_PORT=${WAIM_REDIS_PORT}
+      - WAIM_REDIS_PASSWORD=${WAIM_REDIS_PASSWORD_ENC}
+      # DATABASE
+      - WAIM_DB_URL_ENC=${WAIM_DB_URL_ENC}
+      - WAIM_DB_USERNAME_ENC=${WAIM_DB_USERNAME_ENC}
+      - WAIM_DB_PASSWORD_ENC=${WAIM_DB_PASSWORD_ENC}
+      # JASYPT
+      - WAIM_JASYPT_PASSWORD=${WAIM_JASYPT_PASSWORD}
+    volumes:
+      - ${WAIM_SCHEDULER_VOLUME_LOG:-/app/docker/volume/waim/scheduler/logs}:/application/logs
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - crepen-waim-network
+      - crepen-mariadb-network
+    depends_on:
+      waim-redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+    healthcheck:
+      test: [ "CMD-SHELL", "[ -f /tmp/health/liveness ] || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+
+
+  waim-redis:
+    image: redis:latest
+    container_name: waim-redis
+    hostname: waim-redis
+    restart: always
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    environment:
+      - REDIS_PASSWORD=${WAIM_REDIS_PASSWORD}
+    networks:
+      - crepen-waim-network
+    volumes:
+      - ${WAIM_REDIS_VOLUME_DATA:-/app/docker/volume/waim/redis/data}:/data
+      - ${WAIM_REDIS_VOLUME_CONF:-/app/docker/volume/waim/redis/conf/redis.conf}:/usr/local/etc/redis/redis.conf
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+networks:
+  crepen-waim-network:
+    name: crepen-waim-network
+    external: true
+  crepen-mariadb-network:
+    name: crepen-mariadb-network
+    external: true

@@ -1,0 +1,10 @@
+waim:
+  auth:
+    jwt:
+      secret: ENC(Cg9jfeFZ7ifTzTFpApJYE0VfVePLAwl9SU5Htt7aCwB452EbQhI9/5noCZB+nXmMNxid931WINsLFxYz4UVvWiasTqhBMYHL+Ehzs45mqb8=)
+      expiration: 3600000
+      refresh-expiration: 604800000
+
+  crypto:
+    key: ENC(o1IVsi/lqJloeNaYXsEO4gUfw4OJQJEqC9BjlFoVJ1kI2/zCk/aj9pJJehi0vPgG)
+    salt: ENC(4ui9R6i8MqYQch9ne7EYDWaQY1suYPH+mzt+QDG+nj0=)

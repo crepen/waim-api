@@ -1,0 +1,19 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral() // 여기에 레포지토리를 추가합니다.
+        maven { url 'https://repo.spring.io/milestone' } // 필요한 경우 추가
+    }
+}
+
+rootProject.name = 'waim'
+include 'waim-api', 'waim-core', 'waim-scheduler'
+
+

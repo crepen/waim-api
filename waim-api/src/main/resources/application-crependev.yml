@@ -1,0 +1,31 @@
+spring:
+  config:
+    import: classpath:waim-crependev.yml
+
+  datasource:
+    url: ${WAIM_DB_URL_ENC:no-url}
+    username: ${WAIM_DB_USERNAME_ENC:no-user}
+    password: ${WAIM_DB_PASSWORD_ENC:no-password}
+    driver-class-name: org.mariadb.jdbc.Driver
+
+
+  data:
+    redis:
+      host: ${WAIM_REDIS_HOST:no-host}
+      port: ${WAIM_REDIS_PORT:0}
+      password: ${WAIM_REDIS_PASSWORD:no-password}
+      connect-timeout: 5000ms
+      timeout: 3000ms
+      client-type: lettuce
+      lettuce:
+        shutdown-timeout: 500ms
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+jasypt:
+  encryptor:
+    password: ${WAIM_JASYPT_PASSWORD}
+
+

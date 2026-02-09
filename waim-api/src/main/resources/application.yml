@@ -1,0 +1,113 @@
+spring:
+  application:
+    name: waim-api
+
+  config:
+    import: classpath:waim.yml
+
+  datasource:
+    url: ENC(e2qyP8ShC+KwMgc5YsexM2J1Z3Zi4SQ7xcFMy3ghIahWfi17A98fFzo1KoSMzcrPLOFoMprXmGo=)
+    username: ENC(0Ev5zUmMsZDclnk4b0djxQ==)
+    password: ENC(fyWd330KZIsVjBdiUUGwY0R2/ahvG2+i)
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.MariaDBDialect
+
+  devtools:
+    restart:
+      enabled: true
+      exclude: classpath:/static/**,classpath:/templates/**
+
+  security:
+    user:
+      name: skip
+      password: skip
+
+  # I18n 연동
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+    always-use-message-format: true
+    use-code-as-default-message: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+# Actuator (Health Check & Metrics)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers,circuitbreakerevents
+  endpoint:
+    health:
+      show-details: never
+  simple:
+    metrics:
+      export:
+        enabled: true
+
+# Swagger/OpenAPI Documentation
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+# Resilience4j CircuitBreaker
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 100
+        slow-call-duration-threshold:
+          seconds: 3
+        wait-duration-in-open-state:
+          seconds: 10
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        register-health-indicator: true
+    instances:
+      redisConfigBreaker:
+        base-config: default
+        sliding-window-size: 20              # 윈도우 크기를 키워 일시적 오류에 둔감하게 설정
+        failure-rate-threshold: 80           # 실패율 임계치를 높임
+        minimum-number-of-calls: 10          # 최소 10번은 호출해보고 판단 (중요!)
+        wait-duration-in-open-state:
+          seconds: 5
+        permitted-number-of-calls-in-half-open-state: 5
+        record-exceptions:
+          - org.springframework.data.redis.RedisConnectionFailureException
+          - org.springframework.dao.QueryTimeoutException
+          - io.lettuce.core.RedisCommandTimeoutException
+
+logging:
+  file:
+    name: ${log.dir:logs}/${spring.application.name}.log
+  logback:
+    rollingpolicy:
+      file-name-pattern: ${log.dir:logs}/${spring.application.name}.%d{yyyy-MM-dd}.%i.log
+      max-history: 20
+  level:
+    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: ERROR
+    root: INFO
+    com.waim: info
+
+jasypt:
+  encryptor:
+    password: ${JASYPT_PASSWORD}

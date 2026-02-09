@@ -1,0 +1,65 @@
+variables:
+  WAIM_NEXUS_API_IMAGE: $CREPEN_NEXUS_REPO/waim/api
+  WAIM_NEXUS_SCH_IMAGE:  $CREPEN_NEXUS_REPO/waim/scheduler
+
+stages:
+  - build
+  - deploy
+  - sync
+
+before_script:
+  - echo "$WAIM_NEXUS_PASSWORD" | docker login $CREPEN_NEXUS_REPO -u $WAIM_NEXUS_ID --password-stdin
+
+after_script:
+  - docker logout $CREPEN_NEXUS_REPO
+
+image-api:
+  stage: build
+  script:
+    - echo "Building API Docker Image..."
+    - >
+      docker build 
+      -t $WAIM_NEXUS_API_IMAGE:$CI_COMMIT_SHORT_SHA
+      -t $WAIM_NEXUS_API_IMAGE:latest 
+      -f waim-api/Dockerfile .
+    - echo "Pushing Image to Nexus...."
+    - docker push $WAIM_NEXUS_API_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $WAIM_NEXUS_API_IMAGE:latest
+  only:
+    - master
+
+image-schedule:
+  stage: build
+  script:
+    - echo "Building Scheduler Docker Image..."
+    - >
+      docker build 
+      -t $WAIM_NEXUS_SCH_IMAGE:$CI_COMMIT_SHORT_SHA
+      -t $WAIM_NEXUS_SCH_IMAGE:latest 
+      -f waim-scheduler/Dockerfile .
+    - echo "Pushing Image to Nexus...."
+    - docker push $WAIM_NEXUS_SCH_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $WAIM_NEXUS_SCH_IMAGE:latest
+  only:
+    - master
+
+deploy-container:
+  stage: deploy
+  script:
+    - mkdir -p /app/docker/volume/waim/redis/conf
+
+    - cp $WAIM_REDIS_CONF /app/docker/volume/waim/redis/conf/redis.conf
+    - chmod 644 /app/docker/volume/waim/redis/conf/redis.conf
+
+    - docker compose --env-file .env.docker.crependev up -d --force-recreate
+  only:
+    - master
+
+sync-to-github:
+  stage: sync
+  script:
+    - git remote remove github || true
+    - git remote add github https://project_settings:$GITHUB_WAIM_API_TOKEN@$GITHUB_WAIM_API_REPO
+    - git push github HEAD:$CI_COMMIT_REF_NAME --force
+  only:
+    - master

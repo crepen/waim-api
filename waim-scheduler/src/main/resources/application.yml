@@ -1,0 +1,68 @@
+spring:
+  main:
+    web-application-type: none
+    cloud-platform: KUBERNETES
+  application:
+    name: waim-scheduler
+  config:
+    import: classpath:waim.yml
+  datasource:
+    hikari:
+      connection-timeout: 3000 # 3초 이내 연결 안되면 실패
+    data:
+      redis:
+        connect-timeout: 2000ms # 2초
+
+# Resilience4j CircuitBreaker
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 100
+        slow-call-duration-threshold:
+          seconds: 3
+        wait-duration-in-open-state:
+          seconds: 10
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        register-health-indicator: true
+    instances:
+      redisConfigBreaker:
+        base-config: default
+        sliding-window-size: 20              # 윈도우 크기를 키워 일시적 오류에 둔감하게 설정
+        failure-rate-threshold: 80           # 실패율 임계치를 높임
+        minimum-number-of-calls: 10          # 최소 10번은 호출해보고 판단 (중요!)
+        wait-duration-in-open-state:
+          seconds: 5
+        permitted-number-of-calls-in-half-open-state: 5
+        record-exceptions:
+          - org.springframework.data.redis.RedisConnectionFailureException
+          - org.springframework.dao.QueryTimeoutException
+          - io.lettuce.core.RedisCommandTimeoutException
+
+management:
+  endpoint:
+    health:
+      show-details: always  # 상세 상태 노출
+  health:
+    defaults:
+      enabled: true
+    db:
+      enabled: true
+    redis:
+      enabled: true
+
+logging:
+  file:
+    name: ${log.dir:logs}/${spring.application.name}.log
+  logback:
+    rollingpolicy:
+      file-name-pattern: ${log.dir:logs}/${spring.application.name}.%d{yyyy-MM-dd}.%i.log
+      max-history: 20
+  level:
+    root: INFO
+    com.waim: info

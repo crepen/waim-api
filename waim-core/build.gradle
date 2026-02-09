@@ -1,0 +1,40 @@
+plugins {
+    id 'java-library'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:4.0.1"
+    }
+}
+
+dependencies {
+    // Spring Boot Starter (버전 명시 없이 BOM 관리 유도)
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    api 'org.springframework.boot:spring-boot-starter-security'
+    api 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    api 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
+
+    // JWT (버전 일관성 유지)
+    api 'io.jsonwebtoken:jjwt-api:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+    // 유틸리티
+    implementation 'com.google.guava:guava:33.0.0-jre'
+    implementation 'org.apache.commons:commons-lang3:3.18.0'
+
+    // JSON 처리 (Jackson 버전도 Starter 버전 준수)
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Servlet API (CompileOnly로 API 모듈의 런타임 사용)
+    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+
+    // Lombok (Core 모듈 내부용)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+bootJar { enabled = false } // 실행 파일 생성 방지
+jar { enabled = true }      // 라이브러리 jar 생성
