@@ -11,6 +11,11 @@ spring:
     data:
       redis:
         connect-timeout: 2000ms # 2초
+  autoconfigure:
+    exclude:
+    # Spring security 보안 자동 설정 해제
+     - org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration
+     - org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
 
 server:
   port: 8082
@@ -68,3 +73,5 @@ logging:
   level:
     root: INFO
     com.waim: info
+
+
