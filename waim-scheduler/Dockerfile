@@ -18,17 +18,17 @@ RUN java -Djarmode=layertools -jar waim-scheduler/build/libs/*.jar extract
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /application
 
-# waimuser(1000) 생성 및 보안 강화
-RUN addgroup -S waimgroup && adduser -S waimuser -G waimgroup -u 1000
+# waimuser(1900) 생성 및 보안 강화
+RUN addgroup -S waimgroup && adduser -S waimuser -G waimgroup -u 1900
 RUN chown waimuser:waimgroup /application
 
-COPY --from=builder --chown=1000:1000 /builder/dependencies/ ./
-COPY --from=builder --chown=1000:1000 /builder/spring-boot-loader/ ./
-COPY --from=builder --chown=1000:1000 /builder/snapshot-dependencies/ ./
-COPY --from=builder --chown=1000:1000 /builder/application/ ./
+COPY --from=builder --chown=1900:1900 /builder/dependencies/ ./
+COPY --from=builder --chown=1900:1900 /builder/spring-boot-loader/ ./
+COPY --from=builder --chown=1900:1900 /builder/snapshot-dependencies/ ./
+COPY --from=builder --chown=1900:1900 /builder/application/ ./
 
 ENV JVM_OPTS="-XX:+UseZGC -XX:+UnlockExperimentalVMOptions"
-USER 1000:1000
+USER 1900:1900
 # EXPOSE 8081
 
 VOLUME /application/logs
