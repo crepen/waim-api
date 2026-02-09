@@ -2,6 +2,7 @@ package com.waim.scheduler.common.config;
 
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.SocketOptions;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import java.time.Duration;
 
 @Configuration
+@Slf4j
 public class RedisConfig {
 
     @Value("${spring.data.redis.host:nohost}")
@@ -28,6 +30,9 @@ public class RedisConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
+
+        log.info("[REDIS FACTORY] Connect Redis : {}:{}" , redisHost, redisPort);
+
         // 1. 소켓 및 커넥션 타임아웃 설정 (2초)
         SocketOptions socketOptions = SocketOptions.builder()
                 .connectTimeout(Duration.ofSeconds(1))

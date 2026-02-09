@@ -25,15 +25,21 @@ public class SystemStatusScheduler {
 
     @Scheduled(fixedRate = 5*60*1000)
     public void checkSystemHealth(){
-        Status dbStatus = Objects.requireNonNull(healthEndpoint.healthForPath("db")).getStatus();
-        Status redisStatus = Objects.requireNonNull(healthEndpoint.healthForPath("redis")).getStatus();
+        try{
+            Status dbStatus = Objects.requireNonNull(healthEndpoint.healthForPath("db")).getStatus();
+            Status redisStatus = Objects.requireNonNull(healthEndpoint.healthForPath("redis")).getStatus();
 
-        if(dbStatus.equals(Status.DOWN)){
-            log.error("Database connect failed.");
+            if(dbStatus.equals(Status.DOWN)){
+                log.error("Database connect failed.");
+            }
+
+            else if(redisStatus.equals(Status.DOWN)){
+                log.error("Redis connect failed.");
+            }
+        }
+        catch (Exception _){
+            
         }
 
-        else if(redisStatus.equals(Status.DOWN)){
-            log.error("Redis connect failed.");
-        }
     }
 }
