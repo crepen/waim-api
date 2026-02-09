@@ -1,6 +1,5 @@
 spring:
   main:
-    web-application-type: none
     cloud-platform: KUBERNETES
   application:
     name: waim-scheduler
@@ -12,6 +11,9 @@ spring:
     data:
       redis:
         connect-timeout: 2000ms # 2초
+
+server:
+  port: 8082
 
 # Resilience4j CircuitBreaker
 resilience4j:
