@@ -94,7 +94,7 @@ services:
     # 설정 파일을 먼저 읽고, 비밀번호는 환경 변수를 통해 커맨드 라인에서 덮어씌웁니다.
     command: [
       "valkey-server",
-      "/usr/local/etc/valkey/redis.conf",
+      "/usr/local/etc/valkey/valkey.conf",
       "--requirepass", "${WAIM_REDIS_PASSWORD}"
     ]
     environment:
