@@ -37,8 +37,8 @@ public class SystemStatusScheduler {
                 log.error("Redis connect failed.");
             }
         }
-        catch (Exception _){
-            
+        catch (Exception ex){
+            log.error("Check system scheduler failed. : {}", ex.getMessage());
         }
 
     }
