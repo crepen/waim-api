@@ -47,7 +47,7 @@ image-schedule:
     - docker push $WAIM_NEXUS_SCH_IMAGE:latest
     # CLEAN UP IMAGE
     - echo "Cleaning up SHA-tagged image from host..."
-    - docker rmi $WAIM_NEXUS_API_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker rmi $WAIM_NEXUS_SCH_IMAGE:$CI_COMMIT_SHORT_SHA
   only:
     - master
 
