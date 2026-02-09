@@ -87,7 +87,7 @@ services:
 
 
   waim-redis:
-    image: valkey/valkey:8
+    image: valkey/valkey:9
     container_name: waim-redis
     hostname: waim-redis
     restart: always
@@ -95,7 +95,8 @@ services:
     command: [
       "valkey-server",
       "/usr/local/etc/valkey/valkey.conf",
-      "--requirepass", "${WAIM_REDIS_PASSWORD}"
+      "--requirepass", "${WAIM_REDIS_PASSWORD}",
+      "--dbfilename", "dump_waim.rdb"
     ]
     environment:
       - REDIS_PASSWORD=${WAIM_REDIS_PASSWORD}
