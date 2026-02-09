@@ -91,6 +91,7 @@ public class RedisConfig {
                     // Redis 연결 시도
                     RedisConnection connection = RedisConnectionUtils.getConnection(connectionFactory);
                     try {
+                        log.info("Redis connect success");
                         // 연결 성공 시 (기본 동작 흉내)
                         return Health.up()
                                 .withDetail("version", connection.info().getProperty("redis_version"))
