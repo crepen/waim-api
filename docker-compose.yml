@@ -87,7 +87,7 @@ services:
 
 
   waim-redis:
-    image: valkey/valkey:8.0
+    image: valkey/valkey:8
     container_name: waim-redis
     hostname: waim-redis
     restart: always
