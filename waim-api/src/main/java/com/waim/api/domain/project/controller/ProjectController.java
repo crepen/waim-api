@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,6 +36,40 @@ public class ProjectController {
         return ResponseEntity.ok()
                 .body(
                         BaseResponse.Success.builder()
+                                .build()
+                );
+    }
+
+
+
+    @GetMapping("{projectOwnerUserId}/{projectAlias}")
+    public ResponseEntity<?> getProject(
+            @AuthenticationPrincipal JwtUserDetail userDetail,
+            @PathVariable String projectAlias,
+            @PathVariable String projectOwnerUserId
+    ){
+        var projectData = projectService.getProject(projectOwnerUserId, projectAlias);
+
+        return ResponseEntity.ok()
+                .body(
+                        BaseResponse.Success.builder()
+                                .result(projectData)
+                                .build()
+                );
+    }
+
+
+    @GetMapping("{projectUid}")
+    public ResponseEntity<?> getProject(
+            @AuthenticationPrincipal JwtUserDetail userDetail,
+            @PathVariable String projectUid
+    ){
+        var projectData = projectService.getProject(projectUid);
+
+        return ResponseEntity.ok()
+                .body(
+                        BaseResponse.Success.builder()
+                                .result(projectData)
                                 .build()
                 );
     }

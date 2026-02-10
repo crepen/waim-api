@@ -18,7 +18,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Entity
-@Table(name = "base_user")
+@Table(name = "user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class UserEntity extends CommonTimestampEntity {

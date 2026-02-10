@@ -29,4 +29,15 @@ public class ProjectSpecification {
             return criteriaBuilder.and(predicates);
         });
     }
+
+    public static Specification<ProjectEntity> searchUserProjectAlias(String projectOwnerId , String projectAlias){
+        return ((root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            predicates.add(criteriaBuilder.equal(root.get("projectAlias") , projectAlias));
+            predicates.add(criteriaBuilder.equal(root.get("projectOwner").get("userId") , projectOwnerId));
+
+            return criteriaBuilder.and(predicates);
+        });
+    }
 }

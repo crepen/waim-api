@@ -1,6 +1,7 @@
 package com.waim.core.domain.project.service;
 
 import com.waim.core.common.model.error.WAIMException;
+import com.waim.core.domain.project.model.dto.ProjectData;
 import com.waim.core.domain.project.model.entity.ProjectEntity;
 import com.waim.core.domain.project.model.error.ProjectErrorCode;
 import com.waim.core.domain.project.repository.ProjectRepository;
@@ -11,6 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -26,8 +31,8 @@ public class ProjectService {
      *
      * </p>
      *
-     * @param projectName 프로젝트명
-     * @param projectAlias 프로젝트 약칭
+     * @param projectName   프로젝트명
+     * @param projectAlias  프로젝트 약칭
      * @param createUserUid 프로젝트 생성자 UID
      */
     public void addProject(
@@ -65,4 +70,75 @@ public class ProjectService {
                         .build()
         );
     }
+
+
+    /**
+     * <h3>프로젝트 정보 조회</h3>
+     * <p>
+     * 프로젝트 UID로 검색
+     * </p>
+     *
+     * @param uid Project UID
+     */
+    public Optional<ProjectData> getProject(String uid) {
+
+        // TODO : Validation check
+
+        var searchProject = projectRepository.findByUid(uid);
+
+        return searchProject.map(
+                projectEntity ->
+                        ProjectData.builder()
+                                .uid(projectEntity.getUid())
+                                .projectName(projectEntity.getProjectName())
+                                .projectAlias(projectEntity.getProjectAlias())
+                                .createTimestamp(
+                                        projectEntity.getCreateAt()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant().toEpochMilli()
+                                )
+                                .updateTimestamp(
+                                        projectEntity.getUpdateAt()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant().toEpochMilli()
+                                )
+                                .build()
+        );
+    }
+
+    /**
+     * <h3>프로젝트 정보 조회</h3>
+     * <p>
+     * 프로젝트 UID로 검색
+     * </p>
+     *
+     * @param userId       Owner user id
+     * @param projectAlias Project Alias
+     */
+    public Optional<ProjectData> getProject(String userId, String projectAlias) {
+
+        // TODO : Validation check
+
+        var searchProject = projectRepository.findOne(ProjectSpecification.searchUserProjectAlias(userId, projectAlias));
+
+        return searchProject.map(
+                projectEntity ->
+                        ProjectData.builder()
+                                .uid(projectEntity.getUid())
+                                .projectName(projectEntity.getProjectName())
+                                .projectAlias(projectEntity.getProjectAlias())
+                                .createTimestamp(
+                                        projectEntity.getCreateAt()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant().toEpochMilli()
+                                )
+                                .updateTimestamp(
+                                        projectEntity.getUpdateAt()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant().toEpochMilli()
+                                )
+                                .build()
+        );
+    }
+
 }

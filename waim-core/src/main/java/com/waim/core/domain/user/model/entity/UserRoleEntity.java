@@ -10,7 +10,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Entity
-@Table(name = "base_user_role")
+@Table(name = "user_role")
 @EntityListeners(UserRoleEntityListener.class)
 @NoArgsConstructor
 @AllArgsConstructor

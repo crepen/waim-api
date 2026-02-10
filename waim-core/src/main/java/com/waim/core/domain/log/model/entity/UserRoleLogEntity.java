@@ -12,7 +12,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Entity
-@Table(name = "base_log_user_role")
+@Table(name = "log_user_role")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class UserRoleLogEntity {

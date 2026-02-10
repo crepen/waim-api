@@ -27,6 +27,7 @@ dependencies {
 
     // JSON 처리 (Jackson 버전도 Starter 버전 준수)
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
     // Servlet API (CompileOnly로 API 모듈의 런타임 사용)
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
