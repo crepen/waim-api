@@ -3,17 +3,10 @@ package com.waim.core.domain.user.service;
 
 import com.waim.core.common.model.error.WAIMException;
 import com.waim.core.common.util.crypto.CryptoProvider;
-import com.waim.core.common.util.jwt.JwtTokenProvider;
-import com.waim.core.common.util.jwt.model.JwtGroup;
-import com.waim.core.common.util.jwt.model.JwtUserDetail;
 import com.waim.core.domain.user.model.UserRole;
-import com.waim.core.domain.auth.model.error.AuthErrorCode;
-import com.waim.core.domain.auth.model.error.WAIMAuthModuleException;
-import com.waim.core.domain.auth.model.error.WAIMRefreshTokenValidateException;
 import com.waim.core.domain.configure.service.ValidationChecker;
 import com.waim.core.domain.user.model.UserState;
 import com.waim.core.domain.user.model.entity.UserEntity;
-import com.waim.core.domain.auth.model.error.WAIMLoginValidateException;
 import com.waim.core.domain.user.model.error.UserErrorCode;
 import com.waim.core.domain.user.repoisitory.UserRepository;
 import com.waim.core.domain.user.model.dto.AddUserDTO;
@@ -26,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.swing.text.html.Option;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +26,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class WAIMUserService {
+public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

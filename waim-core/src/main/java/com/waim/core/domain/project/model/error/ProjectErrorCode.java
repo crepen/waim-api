@@ -10,7 +10,9 @@ import org.springframework.http.HttpStatus;
 public enum ProjectErrorCode implements WAIMErrorCode {
     PROJECT_ALIAS_NOT_ALLOW(HttpStatus.BAD_REQUEST , "WA_PRJ0001" , "waim.api.project.common.error.alias_invalid"),
     PROJECT_ALIAS_EMPTY(HttpStatus.BAD_REQUEST , "WA_PRJ0002" , "waim.api.project.common.error.alias_empty"),
-    PROJECT_NAME_EMPTY(HttpStatus.BAD_REQUEST , "WA_PRJ0003" , "waim.api.project.common.error.name_empty"),
+    PROJECT_ALIAS_DUPLICATE(HttpStatus.BAD_REQUEST , "WA_PRJ0003" , "waim.api.project.common.error.alias_duplicate"),
+    PROJECT_NAME_EMPTY(HttpStatus.BAD_REQUEST , "WA_PRJ0004" , "waim.api.project.common.error.name_empty"),
+    PROJECT_NAME_DUPLICATE(HttpStatus.BAD_REQUEST , "WA_PRJ0005" , "waim.api.project.common.error.name_duplicate");
     ;
 
     private final HttpStatus httpStatus;

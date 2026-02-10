@@ -17,11 +17,11 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class WAIMAdminUserService {
+public class AdminUserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final WAIMUserService userService;
+    private final UserService userService;
 
     public boolean isExistAdminRoleUser (){
         return userRepository.exists(UserSpecification.hasRole(UserRole.ADMIN));

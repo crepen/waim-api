@@ -5,12 +5,12 @@ import com.waim.api.domain.auth.model.dto.WAIMAuthGrantType;
 import com.waim.api.domain.auth.model.dto.request.IssuanceTokenRequest;
 import com.waim.core.domain.auth.model.error.WAIMLoginValidateException;
 import com.waim.core.domain.auth.service.AuthService;
-import com.waim.core.domain.user.service.WAIMAdminUserService;
+import com.waim.core.domain.user.service.AdminUserService;
 import com.waim.core.common.model.error.WAIMException;
 import com.waim.core.common.util.jwt.JwtTokenProvider;
 import com.waim.core.common.util.jwt.model.JwtGroup;
 import com.waim.core.common.util.jwt.model.JwtUserDetail;
-import com.waim.core.domain.user.service.WAIMUserService;
+import com.waim.core.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -24,9 +24,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -34,8 +31,8 @@ import java.util.Map;
 public class BaseAuthController {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final WAIMAdminUserService WAIMAdminUserService;
-    private final WAIMUserService userService;
+    private final AdminUserService AdminUserService;
+    private final UserService userService;
     private final AuthService authService;
 
     @GetMapping

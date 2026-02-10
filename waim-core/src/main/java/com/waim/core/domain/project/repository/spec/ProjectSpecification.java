@@ -1,0 +1,32 @@
+package com.waim.core.domain.project.repository.spec;
+
+import com.waim.core.domain.project.model.entity.ProjectEntity;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ProjectSpecification {
+    public static Specification<ProjectEntity> existsUserProjectName(String projectName , String userUid){
+        return ((root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            predicates.add(criteriaBuilder.equal(root.get("projectName") , projectName));
+            predicates.add(criteriaBuilder.equal(root.get("projectOwner").get("uid") , userUid));
+
+            return criteriaBuilder.and(predicates);
+        });
+    }
+
+    public static Specification<ProjectEntity> existsUserProjectAlias(String projectAlias , String userUid){
+        return ((root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            predicates.add(criteriaBuilder.equal(root.get("projectAlias") , projectAlias));
+            predicates.add(criteriaBuilder.equal(root.get("projectOwner").get("uid") , userUid));
+
+            return criteriaBuilder.and(predicates);
+        });
+    }
+}

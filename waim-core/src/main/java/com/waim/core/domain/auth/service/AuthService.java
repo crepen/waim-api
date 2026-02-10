@@ -12,7 +12,7 @@ import com.waim.core.domain.auth.model.error.WAIMRefreshTokenValidateException;
 import com.waim.core.domain.user.model.UserState;
 import com.waim.core.domain.user.model.dto.BaseUser;
 import com.waim.core.domain.user.model.entity.UserEntity;
-import com.waim.core.domain.user.service.WAIMUserService;
+import com.waim.core.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +25,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class AuthService {
-    private final WAIMUserService userService;
+    private final UserService userService;
 
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;

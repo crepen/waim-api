@@ -5,7 +5,7 @@ import com.waim.api.domain.user.model.request.AddUserRequest;
 import com.waim.core.common.util.jwt.model.JwtUserDetail;
 import com.waim.core.domain.user.model.UserState;
 import com.waim.core.domain.user.model.dto.AddUserDTO;
-import com.waim.core.domain.user.service.WAIMUserService;
+import com.waim.core.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class BaseUserController {
 
-    private final WAIMUserService userService;
+    private final UserService userService;
 
     @PutMapping
     @Operation(summary = "사용자 가입 신청" , description = "가입 신청")

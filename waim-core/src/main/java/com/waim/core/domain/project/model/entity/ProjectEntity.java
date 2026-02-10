@@ -6,8 +6,6 @@ import com.waim.core.domain.user.model.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-
 
 /**
  * Project Entity
@@ -32,13 +30,11 @@ public class ProjectEntity extends CommonTimestampEntity {
      * @apiNote 영문(소문자) , 숫자만 허용
      */
     @Column(name = "project_alias" , unique = true , nullable = false)
-    private String alias;
+    private String projectAlias;
 
     @Column(name = "project_name" , unique = true , nullable = false)
     private String projectName;
 
-    @Column(name = "project_owner_uid" ,  nullable = false)
-    private String projectOwnerUid;
 
     @ManyToOne(fetch = FetchType.LAZY) // 성능을 위해 지연 로딩 권장
     @JoinColumn(name = "project_owner_uid", referencedColumnName = "uid", nullable = false)

@@ -113,6 +113,7 @@ public class UserEntity extends CommonTimestampEntity {
         this.roles.removeAll(this.getRoles());
     }
 
+
     //#endregion METHODS
 
     @PrePersist

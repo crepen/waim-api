@@ -3,12 +3,7 @@ package com.waim.api.common.config.security.filter;
 import com.waim.core.common.model.error.WAIMException;
 import com.waim.core.common.util.jwt.JwtTokenProvider;
 import com.waim.core.common.util.jwt.model.JwtUserDetail;
-import com.waim.core.domain.auth.model.error.AuthErrorCode;
-import com.waim.core.domain.auth.model.error.WAIMAuthModuleException;
-import com.waim.core.domain.user.model.entity.UserEntity;
 import com.waim.core.domain.user.model.error.UserErrorCode;
-import com.waim.core.domain.user.repoisitory.UserRepository;
-import com.waim.core.domain.user.service.WAIMUserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +19,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Optional;
 
 
 @Slf4j
