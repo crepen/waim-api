@@ -1,4 +1,4 @@
-package com.waim.api.domain.scalar_ui.controller;
+package com.waim.api.common.scalar_ui.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.context.annotation.Profile;

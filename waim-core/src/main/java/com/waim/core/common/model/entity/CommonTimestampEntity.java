@@ -21,19 +21,5 @@ public abstract class CommonTimestampEntity {
     @Column(name = "update_at", nullable = false)
     private LocalDateTime updateAt;
 
-    @PrePersist
-    protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        if (this.createAt == null) {
-            this.createAt = now;
-        }
-        if (this.updateAt == null) {
-            this.updateAt = now;
-        }
-    }
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updateAt = LocalDateTime.now();
-    }
 }

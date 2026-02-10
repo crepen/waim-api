@@ -1,5 +1,7 @@
 package com.waim.core.domain.user.model.entity;
 
+import com.waim.core.common.model.entity.CommonTimestampEntity;
+import com.waim.core.domain.project.model.entity.ProjectEntity;
 import com.waim.core.domain.user.model.UserRole;
 import com.waim.core.domain.user.model.UserState;
 import jakarta.persistence.*;
@@ -19,9 +21,10 @@ import java.util.UUID;
 @Table(name = "base_user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class UserEntity {
+public class UserEntity extends CommonTimestampEntity {
     @Id
-    @Column(name = "uid", length = 100, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "uid", length = 36, nullable = false)
     private String uid;
 
     @Column(name = "user_id" , length = 100 , nullable = false)
@@ -44,17 +47,13 @@ public class UserEntity {
     @Builder.Default
     private UserState userState = UserState.PENDING;
 
-    @Builder.Default // Builder 사용 시 리스트 초기화 보장
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRoleEntity> roles = new ArrayList<>();
 
-    @CreationTimestamp // INSERT 시점의 시간 자동 입력
-    @Column(name = "create_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createAt;
-
-    @UpdateTimestamp // UPDATE 시점의 시간 자동 업데이트
-    @Column(name = "update_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime updateAt;
+    @Builder.Default
+    @OneToMany(mappedBy = "projectOwner", cascade = CascadeType.ALL)
+    private List<ProjectEntity> projects = new ArrayList<>();
 
 
     //#region METHODS
@@ -118,23 +117,13 @@ public class UserEntity {
 
     @PrePersist
     protected void onCreate() {
-        if(this.uid == null){
-            this.uid = UUID.randomUUID().toString();
-        }
-
         if(this.userState == null){
             this.userState = UserState.PENDING;
-        }
-
-        if(createAt == null) {
-            this.createAt = LocalDateTime.now();
         }
     }
 
     @PreUpdate
     protected void onUpdate() {
-        if(this.updateAt == null){
-            this.updateAt = LocalDateTime.now();
-        }
+
     }
 }
