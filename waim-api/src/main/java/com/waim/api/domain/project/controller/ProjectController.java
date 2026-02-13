@@ -2,14 +2,22 @@ package com.waim.api.domain.project.controller;
 
 import com.waim.api.common.model.response.BaseResponse;
 import com.waim.api.domain.project.model.request.AddProjectRequest;
+import com.waim.api.domain.project.model.request.SearchProjectRequest;
 import com.waim.core.common.util.jwt.model.JwtUserDetail;
+import com.waim.core.domain.project.model.dto.ProjectData;
+import com.waim.core.domain.project.model.dto.ProjectSearchOption;
 import com.waim.core.domain.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,6 +25,35 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/project")
 public class ProjectController {
     private final ProjectService projectService;
+
+    @GetMapping()
+    @Operation(
+            summary = "프로젝트 검색"
+    )
+    public ResponseEntity<?> searchProject(
+            @AuthenticationPrincipal JwtUserDetail userDetail,
+            @PageableDefault(size = 10 , sort = "projectName" , direction = Sort.Direction.DESC)Pageable pageable,
+            SearchProjectRequest reqParam
+    ){
+
+        List<ProjectData> projectDataList = projectService.searchProject(
+                ProjectSearchOption.builder()
+                        .searchKeyword(reqParam.searchKeyword())
+                        .searchUserUid(userDetail.getUserUid())
+                        .pageable(pageable)
+                        .build()
+        );
+
+
+
+        return ResponseEntity.ok(
+                BaseResponse.Success.builder()
+                        .result(projectDataList)
+                        .build()
+        );
+    }
+
+
 
     @PutMapping()
     @Operation(
@@ -70,6 +107,23 @@ public class ProjectController {
                 .body(
                         BaseResponse.Success.builder()
                                 .result(projectData)
+                                .build()
+                );
+    }
+
+    @DeleteMapping("{projectUid}")
+    public ResponseEntity<?> deleteProject(
+            @AuthenticationPrincipal JwtUserDetail userDetail,
+            @PathVariable String projectUid
+    ){
+        projectService.removeProject(
+                projectUid,
+                userDetail.getUserUid()
+        );
+
+        return ResponseEntity.ok()
+                .body(
+                        BaseResponse.Success.builder()
                                 .build()
                 );
     }

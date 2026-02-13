@@ -9,7 +9,7 @@ import com.waim.core.domain.auth.model.error.AuthErrorCode;
 import com.waim.core.domain.auth.model.error.WAIMAuthModuleException;
 import com.waim.core.domain.auth.model.error.WAIMLoginValidateException;
 import com.waim.core.domain.auth.model.error.WAIMRefreshTokenValidateException;
-import com.waim.core.domain.user.model.UserState;
+import com.waim.core.domain.user.model.dto.enumable.UserState;
 import com.waim.core.domain.user.model.dto.BaseUser;
 import com.waim.core.domain.user.model.entity.UserEntity;
 import com.waim.core.domain.user.service.UserService;

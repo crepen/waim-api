@@ -51,3 +51,6 @@ logs
 # Docker Compose Local env
 ./.env.docker.local
 /.env.docker.local
+
+
+sql

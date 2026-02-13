@@ -1,6 +1,6 @@
 package com.waim.core.domain.user.model.dto;
 
-import com.waim.core.domain.user.model.UserState;
+import com.waim.core.domain.user.model.dto.enumable.UserState;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

@@ -2,19 +2,27 @@ package com.waim.core.domain.project.service;
 
 import com.waim.core.common.model.error.WAIMException;
 import com.waim.core.domain.project.model.dto.ProjectData;
+import com.waim.core.domain.project.model.dto.ProjectSearchOption;
+import com.waim.core.domain.project.model.dto.enumable.ProjectStatus;
 import com.waim.core.domain.project.model.entity.ProjectEntity;
+import com.waim.core.domain.project.model.entity.ProjectRoleEntity;
 import com.waim.core.domain.project.model.error.ProjectErrorCode;
 import com.waim.core.domain.project.repository.ProjectRepository;
 import com.waim.core.domain.project.repository.spec.ProjectSpecification;
 import com.waim.core.domain.user.model.entity.UserEntity;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Join;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,6 +31,21 @@ import java.util.Optional;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final EntityManager entityManager;
+
+
+    /**
+     * <h3>프로젝트 검색</h3>
+     *
+     * @return
+     */
+    public List<ProjectData> searchProject(ProjectSearchOption searchOption){
+
+        Specification<ProjectEntity> spec = (root, query, cb) -> cb.conjunction();
+
+
+        return new ArrayList<>();
+    }
+
 
     /**
      * <h3>사용자 프로젝트 생성</h3>
@@ -57,18 +80,25 @@ public class ProjectService {
             throw new WAIMException(ProjectErrorCode.PROJECT_ALIAS_DUPLICATE);
         }
 
-        projectRepository.save(
-                ProjectEntity.builder()
-                        .projectName(projectName)
-                        .projectAlias(projectAlias)
-                        .projectOwner(
-                                entityManager.getReference(
-                                        UserEntity.class,
-                                        createUserUid
-                                )
-                        )
+        UserEntity actionUserEntity = entityManager.getReference(
+                UserEntity.class,
+                createUserUid
+        );
+
+
+        ProjectEntity insertEntity = ProjectEntity.builder()
+                .projectName(projectName)
+                .projectAlias(projectAlias)
+                .projectOwner(actionUserEntity)
+                .build();
+
+        insertEntity.addRole(
+                ProjectRoleEntity.builder()
+                        .user(actionUserEntity)
                         .build()
         );
+
+        projectRepository.save(insertEntity);
     }
 
 
@@ -139,6 +169,38 @@ public class ProjectService {
                                 )
                                 .build()
         );
+    }
+
+    @Transactional
+    public void removeProject(String projectUid , String actionUserUid){
+
+        if(!StringUtils.hasText(projectUid)){
+            // TODO : UPDATE EXCEPTION
+            throw new WAIMException();
+        }
+
+        Specification<ProjectEntity> spec = (root, query, cb) -> cb.equal(root.get("uid") , projectUid);
+
+        if(StringUtils.hasText(actionUserUid)){
+            spec = spec.and((root, query, cb) -> {
+                Join<ProjectEntity, ProjectRoleEntity> roleJoin = root.join("projectRoles");
+                return cb.equal(roleJoin.get("user").get("uid"), actionUserUid);
+            });
+        }
+
+        var matchProject = projectRepository.findOne(spec);
+
+        if(matchProject.isEmpty()){
+            // TODO : UPDATE EXCEPTION
+            throw new WAIMException();
+        }
+
+
+
+        matchProject.get().setProjectStatus(ProjectStatus.DELETED);
+
+        projectRepository.save(matchProject.get());
+
     }
 
 }

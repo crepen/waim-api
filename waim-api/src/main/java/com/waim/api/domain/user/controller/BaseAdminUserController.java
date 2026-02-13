@@ -3,7 +3,7 @@ package com.waim.api.domain.user.controller;
 import com.waim.api.common.model.response.BaseResponse;
 import com.waim.api.domain.user.model.request.AddUserRequest;
 import com.waim.core.common.util.jwt.model.JwtUserDetail;
-import com.waim.core.domain.user.model.UserState;
+import com.waim.core.domain.user.model.dto.enumable.UserState;
 import com.waim.core.domain.user.model.dto.AddUserDTO;
 import com.waim.core.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,4 +1,4 @@
-package com.waim.core.domain.user.model;
+package com.waim.core.domain.user.model.dto.enumable;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -16,11 +16,19 @@ import java.time.LocalDateTime;
 public abstract class CommonTimestampEntity {
 
     @CreationTimestamp // 생성 시 자동 기록
-    @Column(name = "create_at", nullable = false, updatable = false)
+    @Column(
+            name = "create_at", nullable = false, updatable = false ,
+            columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+            comment = "생성일"
+    )
     private LocalDateTime createAt;
 
     @UpdateTimestamp // 수정 시 자동 기록
-    @Column(name = "update_at", nullable = false)
+    @Column(
+            name = "update_at", nullable = false ,
+            columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+            comment = "마지막 수정일"
+    )
     private LocalDateTime updateAt;
 
 

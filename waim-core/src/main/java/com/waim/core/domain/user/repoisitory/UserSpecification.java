@@ -1,6 +1,6 @@
 package com.waim.core.domain.user.repoisitory;
 
-import com.waim.core.domain.user.model.UserRole;
+import com.waim.core.domain.user.model.dto.enumable.UserRole;
 import com.waim.core.domain.user.model.entity.UserRoleEntity;
 import com.waim.core.domain.user.model.entity.UserEntity;
 import jakarta.persistence.criteria.CriteriaBuilder;

@@ -3,9 +3,9 @@ package com.waim.core.domain.user.service;
 
 import com.waim.core.common.model.error.WAIMException;
 import com.waim.core.common.util.crypto.CryptoProvider;
-import com.waim.core.domain.user.model.UserRole;
+import com.waim.core.domain.user.model.dto.enumable.UserRole;
 import com.waim.core.domain.configure.service.ValidationChecker;
-import com.waim.core.domain.user.model.UserState;
+import com.waim.core.domain.user.model.dto.enumable.UserState;
 import com.waim.core.domain.user.model.entity.UserEntity;
 import com.waim.core.domain.user.model.error.UserErrorCode;
 import com.waim.core.domain.user.repoisitory.UserRepository;

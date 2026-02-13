@@ -1,7 +1,7 @@
 package com.waim.core.domain.user.service;
 
-import com.waim.core.domain.user.model.UserRole;
-import com.waim.core.domain.user.model.UserState;
+import com.waim.core.domain.user.model.dto.enumable.UserRole;
+import com.waim.core.domain.user.model.dto.enumable.UserState;
 import com.waim.core.domain.user.model.dto.AddUserDTO;
 import com.waim.core.domain.user.repoisitory.UserRepository;
 import com.waim.core.domain.user.repoisitory.UserSpecification;
