@@ -32,7 +32,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: '4.0'
           memory: 2G
     healthcheck:
       test: [ "CMD-SHELL", "curl -f -s http://localhost:8080/api/system/status || exit 1" ]
