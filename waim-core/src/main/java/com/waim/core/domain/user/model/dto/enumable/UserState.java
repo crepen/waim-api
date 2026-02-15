@@ -6,10 +6,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum UserState {
-    PENDING("PENDING"),
-    ACTIVE("ACTIVE"),
-    WITHDRAWN("WITHDRAWN"),
-    SUSPENDED("SUSPENDED");
-
-    private final String text;
+    PENDING,
+    ACTIVE,
+    WITHDRAWN,
+    SUSPENDED
 }

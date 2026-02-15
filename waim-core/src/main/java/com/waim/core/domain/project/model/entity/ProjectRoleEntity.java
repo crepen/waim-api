@@ -1,6 +1,7 @@
 package com.waim.core.domain.project.model.entity;
 
 import com.waim.core.common.model.entity.CommonTimestampEntity;
+import com.waim.core.domain.project.model.dto.enumable.ProjectRole;
 import com.waim.core.domain.project.model.entity.id.ProjectRoleId;
 import com.waim.core.domain.user.model.entity.UserEntity;
 import jakarta.persistence.*;
@@ -42,11 +43,13 @@ public class ProjectRoleEntity extends CommonTimestampEntity {
     )
     private UserEntity user;
 
+    @Enumerated(EnumType.STRING)
     @Column(
             name = "role" , nullable = false,
+            columnDefinition = "VARCHAR(30)",
             comment = "사용자 프로젝트 역할"
     )
-    private String role;
+    private ProjectRole role;
 
     @PrePersist
     protected void onCreate() {

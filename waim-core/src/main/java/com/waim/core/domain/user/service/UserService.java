@@ -10,7 +10,7 @@ import com.waim.core.domain.user.model.entity.UserEntity;
 import com.waim.core.domain.user.model.error.UserErrorCode;
 import com.waim.core.domain.user.repoisitory.UserRepository;
 import com.waim.core.domain.user.model.dto.AddUserDTO;
-import com.waim.core.domain.user.repoisitory.UserSpecification;
+import com.waim.core.domain.user.repoisitory.spec.UserSpecification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ public class UserService {
 
     @Transactional
     public void addUser(AddUserDTO addUserDTO) {
-        addUser(addUserDTO , UserRole.USER.getValue());
+        addUser(addUserDTO , UserRole.ROLE_USER.name());
     }
 
     @Transactional

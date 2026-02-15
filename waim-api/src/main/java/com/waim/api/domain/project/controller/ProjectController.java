@@ -1,15 +1,19 @@
 package com.waim.api.domain.project.controller;
 
+import com.waim.api.common.model.CommonPageable;
+import com.waim.api.common.model.response.BasePageableResponse;
 import com.waim.api.common.model.response.BaseResponse;
 import com.waim.api.domain.project.model.request.AddProjectRequest;
 import com.waim.api.domain.project.model.request.SearchProjectRequest;
 import com.waim.core.common.util.jwt.model.JwtUserDetail;
 import com.waim.core.domain.project.model.dto.ProjectData;
 import com.waim.core.domain.project.model.dto.ProjectSearchOption;
+import com.waim.core.domain.project.model.entity.ProjectEntity;
 import com.waim.core.domain.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -17,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZoneId;
 import java.util.List;
 
 @RestController
@@ -32,11 +37,11 @@ public class ProjectController {
     )
     public ResponseEntity<?> searchProject(
             @AuthenticationPrincipal JwtUserDetail userDetail,
-            @PageableDefault(size = 10 , sort = "projectName" , direction = Sort.Direction.DESC)Pageable pageable,
+            @PageableDefault(size = 10 , sort = "updateAt" , direction = Sort.Direction.DESC)Pageable pageable,
             SearchProjectRequest reqParam
-    ){
+    ) {
 
-        List<ProjectData> projectDataList = projectService.searchProject(
+        Page<ProjectEntity> projectDataList = projectService.searchProjectPageable(
                 ProjectSearchOption.builder()
                         .searchKeyword(reqParam.searchKeyword())
                         .searchUserUid(userDetail.getUserUid())
@@ -45,10 +50,10 @@ public class ProjectController {
         );
 
 
-
         return ResponseEntity.ok(
-                BaseResponse.Success.builder()
-                        .result(projectDataList)
+                BasePageableResponse.Success.builder()
+                        .result(projectDataList.map(ProjectEntity::castDataDto).get())
+                        .pageable(CommonPageable.cast(projectDataList))
                         .build()
         );
     }

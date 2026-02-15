@@ -4,6 +4,8 @@ import com.waim.core.common.model.entity.CommonTimestampEntity;
 import com.waim.core.domain.project.model.entity.ProjectEntity;
 import com.waim.core.domain.user.model.dto.enumable.UserRole;
 import com.waim.core.domain.user.model.dto.enumable.UserState;
+import com.waim.core.domain.user.service.listener.UserEventListener;
+import com.waim.core.domain.user.service.listener.UserRoleEventListener;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +23,7 @@ import java.util.List;
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@EntityListeners(UserEventListener.class)
 public class UserEntity extends CommonTimestampEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -83,7 +86,7 @@ public class UserEntity extends CommonTimestampEntity {
     public void addRole(UserRole roleObj) {
         UserRoleEntity role = UserRoleEntity.builder()
                 .user(this)
-                .role(roleObj.getValue())
+                .role(roleObj.name())
                 .build();
         this.roles.add(role);
     }

@@ -4,7 +4,7 @@ import com.waim.core.domain.user.model.dto.enumable.UserRole;
 import com.waim.core.domain.user.model.dto.enumable.UserState;
 import com.waim.core.domain.user.model.dto.AddUserDTO;
 import com.waim.core.domain.user.repoisitory.UserRepository;
-import com.waim.core.domain.user.repoisitory.UserSpecification;
+import com.waim.core.domain.user.repoisitory.spec.UserSpecification;
 import com.waim.core.domain.user.model.entity.UserEntity;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class AdminUserService {
     private final UserService userService;
 
     public boolean isExistAdminRoleUser (){
-        return userRepository.exists(UserSpecification.hasRole(UserRole.ADMIN));
+        return userRepository.exists(UserSpecification.hasRole(UserRole.ROLE_ADMIN));
     }
 
 
@@ -41,10 +41,10 @@ public class AdminUserService {
                 .userState(UserState.ACTIVE)
                 .build();
 
-        userService.addUser(addUserDTO , UserRole.ADMIN.getValue());
+        userService.addUser(addUserDTO , UserRole.ROLE_ADMIN.name());
     }
 
     public List<UserEntity> getAdminUserAccount(){
-        return userRepository.findAll(UserSpecification.hasRole(UserRole.ADMIN));
+        return userRepository.findAll(UserSpecification.hasRole(UserRole.ROLE_ADMIN));
     }
 }

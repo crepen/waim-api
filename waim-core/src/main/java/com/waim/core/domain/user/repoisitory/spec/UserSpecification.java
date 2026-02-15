@@ -1,4 +1,4 @@
-package com.waim.core.domain.user.repoisitory;
+package com.waim.core.domain.user.repoisitory.spec;
 
 import com.waim.core.domain.user.model.dto.enumable.UserRole;
 import com.waim.core.domain.user.model.entity.UserRoleEntity;
@@ -58,7 +58,7 @@ public class UserSpecification {
 
             Join<UserEntity, UserRoleEntity> userRoles = root.join("roles", JoinType.INNER);
 
-            return criteriaBuilder.equal(userRoles.get("role"), role.getValue());
+            return criteriaBuilder.equal(userRoles.get("role"), role.name());
         };
     }
 

@@ -3,6 +3,7 @@ package com.waim.core.domain.project.service;
 import com.waim.core.common.model.error.WAIMException;
 import com.waim.core.domain.project.model.dto.ProjectData;
 import com.waim.core.domain.project.model.dto.ProjectSearchOption;
+import com.waim.core.domain.project.model.dto.enumable.ProjectRole;
 import com.waim.core.domain.project.model.dto.enumable.ProjectStatus;
 import com.waim.core.domain.project.model.entity.ProjectEntity;
 import com.waim.core.domain.project.model.entity.ProjectRoleEntity;
@@ -14,14 +15,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.sql.Timestamp;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +31,7 @@ import java.util.Optional;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final EntityManager entityManager;
+    private final ProjectRoleService projectRoleService;
 
 
     /**
@@ -38,13 +39,15 @@ public class ProjectService {
      *
      * @return
      */
-    public List<ProjectData> searchProject(ProjectSearchOption searchOption){
+    public Page<ProjectEntity> searchProjectPageable(ProjectSearchOption searchOption) {
 
-        Specification<ProjectEntity> spec = (root, query, cb) -> cb.conjunction();
-
-
-        return new ArrayList<>();
+        return projectRepository.findAll(
+                ProjectSpecification.searchUserProject(searchOption.searchUserUid() , searchOption.searchKeyword()),
+                searchOption.pageable()
+        );
     }
+
+
 
 
     /**
@@ -92,13 +95,15 @@ public class ProjectService {
                 .projectOwner(actionUserEntity)
                 .build();
 
-        insertEntity.addRole(
-                ProjectRoleEntity.builder()
-                        .user(actionUserEntity)
-                        .build()
-        );
 
-        projectRepository.save(insertEntity);
+
+        var storeProjectEntity = projectRepository.save(insertEntity);
+
+        projectRoleService.addRole(
+                Optional.of(storeProjectEntity),
+                Optional.of(actionUserEntity),
+                ProjectRole.ROLE_READ , ProjectRole.ROLE_WRITE , ProjectRole.ROLE_DELETE
+        );
     }
 
 
@@ -110,30 +115,32 @@ public class ProjectService {
      *
      * @param uid Project UID
      */
-    public Optional<ProjectData> getProject(String uid) {
+    public Optional<ProjectEntity> getProject(String uid) {
 
         // TODO : Validation check
 
         var searchProject = projectRepository.findByUid(uid);
 
-        return searchProject.map(
-                projectEntity ->
-                        ProjectData.builder()
-                                .uid(projectEntity.getUid())
-                                .projectName(projectEntity.getProjectName())
-                                .projectAlias(projectEntity.getProjectAlias())
-                                .createTimestamp(
-                                        projectEntity.getCreateAt()
-                                                .atZone(ZoneId.systemDefault())
-                                                .toInstant().toEpochMilli()
-                                )
-                                .updateTimestamp(
-                                        projectEntity.getUpdateAt()
-                                                .atZone(ZoneId.systemDefault())
-                                                .toInstant().toEpochMilli()
-                                )
-                                .build()
-        );
+        return searchProject;
+
+//        return searchProject.map(
+//                projectEntity ->
+//                        ProjectData.builder()
+//                                .uid(projectEntity.getUid())
+//                                .projectName(projectEntity.getProjectName())
+//                                .projectAlias(projectEntity.getProjectAlias())
+//                                .createTimestamp(
+//                                        projectEntity.getCreateAt()
+//                                                .atZone(ZoneId.systemDefault())
+//                                                .toInstant().toEpochMilli()
+//                                )
+//                                .updateTimestamp(
+//                                        projectEntity.getUpdateAt()
+//                                                .atZone(ZoneId.systemDefault())
+//                                                .toInstant().toEpochMilli()
+//                                )
+//                                .build()
+//        );
     }
 
     /**

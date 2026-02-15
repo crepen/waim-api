@@ -22,4 +22,10 @@ public class ProjectData {
 
     @JsonProperty("update_timestamp")
     long updateTimestamp;
+
+    @JsonProperty("project_owner_name")
+    String projectOwnerName;
+
+    @JsonProperty("project_owner_uid")
+    String projectOwnerUid;
 }

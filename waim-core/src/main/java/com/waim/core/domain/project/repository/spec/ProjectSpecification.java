@@ -1,8 +1,12 @@
 package com.waim.core.domain.project.repository.spec;
 
 import com.waim.core.domain.project.model.entity.ProjectEntity;
+import com.waim.core.domain.project.model.entity.ProjectRoleEntity;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +42,35 @@ public class ProjectSpecification {
             predicates.add(criteriaBuilder.equal(root.get("projectOwner").get("userId") , projectOwnerId));
 
             return criteriaBuilder.and(predicates);
+        });
+    }
+
+
+    public static Specification<ProjectEntity> searchUserProject(String searchUserUid , String searchKeyword) {
+        return ((root, query, cb) -> {
+            // 중복 제거
+            query.distinct(true);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            Join<ProjectEntity, ProjectRoleEntity> projectRoleJoin = root.join("projectRoles", JoinType.INNER);
+
+            predicates.add(
+                    cb.equal(projectRoleJoin.get("user").get("uid"), searchUserUid)
+            );
+
+            if (StringUtils.hasText(searchKeyword)) {
+                String pattern = "%" + searchKeyword.toLowerCase() + "%";
+
+                predicates.add(
+                        cb.or(
+                                cb.like(cb.lower(root.get("projectAlias")), pattern),
+                                cb.like(cb.lower(root.get("projectName")), pattern)
+                        )
+                );
+            }
+
+            return cb.and(predicates);
         });
     }
 }

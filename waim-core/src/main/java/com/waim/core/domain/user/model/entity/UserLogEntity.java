@@ -1,52 +1,43 @@
-package com.waim.core.domain.log.model.entity;
+package com.waim.core.domain.user.model.entity;
 
 import com.waim.core.common.model.entity.CommonTimestampEntity;
-import com.waim.core.domain.log.model.UserRoleLogState;
+import com.waim.core.domain.user.model.dto.enumable.UserEventAction;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 @Entity
 @Table(
-        name = "log_user_role",
+        name = "log_user",
         options = "DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci",
-        comment = "사용자 권한 관리 로그 Table"
+        comment = "사용자 로그 관리 Table"
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class UserRoleLogEntity extends CommonTimestampEntity {
+public class UserLogEntity extends CommonTimestampEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(
-            name = "uid" , length = 100 , nullable = false , unique = true,
-            comment = "사용자 권한 로그 Unique ID"
+            name = "uid" , length = 36 , nullable = false , unique = true,
+            comment = "사용자 로그 Unique ID"
     )
     private String uid;
 
     @Column(
-            name = "user_uid" , length = 100 , nullable = false,
+            name = "user_uid" , length = 36 , nullable = false,
             comment = "사용자 UID"
     )
     private String userUid;
 
-    @Column(
-            name = "role" , length = 100 , nullable = false,
-            comment = "사용자 부여 권한"
-    )
-    private String role;
-
     @Enumerated(EnumType.STRING)
     @Column(
-            name = "state" , length = 30 , nullable = false ,
+            name = "log_state" , length = 30 , nullable = false,
             columnDefinition = "VARCHAR(30)",
             comment = "로그 상태"
     )
-    private UserRoleLogState state;
+    private UserEventAction logState;
 
     @Column(
             name = "ip" , length = 100 , nullable = false,
@@ -63,8 +54,16 @@ public class UserRoleLogEntity extends CommonTimestampEntity {
 
     @PrePersist
     protected void onCreate() {
-        if (this.uid == null) {
-            this.uid = UUID.randomUUID().toString();
-        }
+
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+
+    }
+
+    @PreRemove
+    protected void onRemove() {
+
     }
 }

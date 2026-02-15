@@ -1,12 +1,15 @@
 package com.waim.core.domain.project.model.entity;
 
 import com.waim.core.common.model.entity.CommonTimestampEntity;
+import com.waim.core.domain.project.model.dto.ProjectData;
+import com.waim.core.domain.project.model.dto.enumable.ProjectRole;
 import com.waim.core.domain.project.model.dto.enumable.ProjectStatus;
-import com.waim.core.domain.project.model.entity.listener.ProjectEntityListener;
+import com.waim.core.domain.project.service.listener.ProjectEventListener;
 import com.waim.core.domain.user.model.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +28,7 @@ import java.util.List;
         options = "DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci",
         comment = "프로젝트 Table"
 )
-@EntityListeners(ProjectEntityListener.class)
+@EntityListeners(ProjectEventListener.class)
 public class ProjectEntity extends CommonTimestampEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -81,9 +84,45 @@ public class ProjectEntity extends CommonTimestampEntity {
 
     // region ##### METHOD ######
 
-    public void addRole(ProjectRoleEntity role) {
-        this.projectRoles.add(role);
-        role.setProject(this); // 자식 엔티티에도 부모를 설정
+    public void addRole(ProjectRoleEntity ...roles) {
+        for(ProjectRoleEntity role : roles) {
+            this.projectRoles.add(role);
+            role.setProject(this);
+        }
+
+    }
+
+    public void addRole(UserEntity actionUserEntity, ProjectRole ...roles){
+        for(ProjectRole role : roles){
+            var roleEntity = ProjectRoleEntity.builder()
+                    .user(actionUserEntity)
+                    .role(role)
+                    .build();
+
+            this.projectRoles.add(roleEntity);
+            roleEntity.setProject(this);
+        }
+    }
+
+
+    public ProjectData castDataDto(){
+        return ProjectData.builder()
+                .uid(this.getUid())
+                .projectName(this.getProjectName())
+                .projectAlias(this.getProjectAlias())
+                .projectOwnerName(this.getProjectOwner().getUserName())
+                .projectOwnerUid(this.getProjectOwner().getUid())
+                .createTimestamp(
+                        this.getCreateAt()
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant().toEpochMilli()
+                )
+                .updateTimestamp(
+                        this.getUpdateAt()
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant().toEpochMilli()
+                )
+                .build();
     }
 
     // endregion ##### METHOD ######
