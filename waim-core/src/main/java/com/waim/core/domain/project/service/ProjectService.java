@@ -1,6 +1,8 @@
 package com.waim.core.domain.project.service;
 
 import com.waim.core.common.model.error.WAIMException;
+import com.waim.core.common.util.date.DateUtil;
+import com.waim.core.common.util.date.LocalDateTimeExtension;
 import com.waim.core.domain.project.model.dto.ProjectData;
 import com.waim.core.domain.project.model.dto.ProjectSearchOption;
 import com.waim.core.domain.project.model.dto.enumable.ProjectRole;
@@ -14,6 +16,7 @@ import com.waim.core.domain.user.model.entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.ExtensionMethod;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -28,6 +31,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@ExtensionMethod({LocalDateTimeExtension.class})
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final EntityManager entityManager;
@@ -118,29 +122,11 @@ public class ProjectService {
     public Optional<ProjectEntity> getProject(String uid) {
 
         // TODO : Validation check
+        if(!StringUtils.hasText(uid)){
+            throw new WAIMException();
+        }
 
-        var searchProject = projectRepository.findByUid(uid);
-
-        return searchProject;
-
-//        return searchProject.map(
-//                projectEntity ->
-//                        ProjectData.builder()
-//                                .uid(projectEntity.getUid())
-//                                .projectName(projectEntity.getProjectName())
-//                                .projectAlias(projectEntity.getProjectAlias())
-//                                .createTimestamp(
-//                                        projectEntity.getCreateAt()
-//                                                .atZone(ZoneId.systemDefault())
-//                                                .toInstant().toEpochMilli()
-//                                )
-//                                .updateTimestamp(
-//                                        projectEntity.getUpdateAt()
-//                                                .atZone(ZoneId.systemDefault())
-//                                                .toInstant().toEpochMilli()
-//                                )
-//                                .build()
-//        );
+        return projectRepository.findByUid(uid);
     }
 
     /**
@@ -152,30 +138,13 @@ public class ProjectService {
      * @param userId       Owner user id
      * @param projectAlias Project Alias
      */
-    public Optional<ProjectData> getProject(String userId, String projectAlias) {
+    public Optional<ProjectEntity> getProject(String userId, String projectAlias) {
 
         // TODO : Validation check
 
         var searchProject = projectRepository.findOne(ProjectSpecification.searchUserProjectAlias(userId, projectAlias));
 
-        return searchProject.map(
-                projectEntity ->
-                        ProjectData.builder()
-                                .uid(projectEntity.getUid())
-                                .projectName(projectEntity.getProjectName())
-                                .projectAlias(projectEntity.getProjectAlias())
-                                .createTimestamp(
-                                        projectEntity.getCreateAt()
-                                                .atZone(ZoneId.systemDefault())
-                                                .toInstant().toEpochMilli()
-                                )
-                                .updateTimestamp(
-                                        projectEntity.getUpdateAt()
-                                                .atZone(ZoneId.systemDefault())
-                                                .toInstant().toEpochMilli()
-                                )
-                                .build()
-        );
+        return searchProject;
     }
 
     @Transactional

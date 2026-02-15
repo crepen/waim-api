@@ -114,12 +114,10 @@ public class ProjectEntity extends CommonTimestampEntity {
                 .projectOwnerUid(this.getProjectOwner().getUid())
                 .createTimestamp(
                         this.getCreateAt()
-                                .atZone(ZoneId.systemDefault())
                                 .toInstant().toEpochMilli()
                 )
                 .updateTimestamp(
                         this.getUpdateAt()
-                                .atZone(ZoneId.systemDefault())
                                 .toInstant().toEpochMilli()
                 )
                 .build();

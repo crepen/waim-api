@@ -15,7 +15,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ProjectEventHandler {
+public class ProjectLogEventHandler {
 
 
     /**
@@ -27,7 +27,7 @@ public class ProjectEventHandler {
     public void handleProjectLogEvent(CommonProjectEvent event){
         // Project Remove Log
         log.info(
-                "[ProjectEventHandler.handleProjectLogEvent] {} Project Entity. -> {}/{}",
+                "[ProjectLogEventHandler.handleProjectLogEvent] {} Project Entity. -> {}/{}",
                 event.action(),
                 event.requestClientIp(),
                 event.requestActUserUid()

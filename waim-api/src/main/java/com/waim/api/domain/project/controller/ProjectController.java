@@ -5,6 +5,7 @@ import com.waim.api.common.model.response.BasePageableResponse;
 import com.waim.api.common.model.response.BaseResponse;
 import com.waim.api.domain.project.model.request.AddProjectRequest;
 import com.waim.api.domain.project.model.request.SearchProjectRequest;
+import com.waim.core.common.model.error.WAIMException;
 import com.waim.core.common.util.jwt.model.JwtUserDetail;
 import com.waim.core.domain.project.model.dto.ProjectData;
 import com.waim.core.domain.project.model.dto.ProjectSearchOption;
@@ -92,10 +93,15 @@ public class ProjectController {
     ){
         var projectData = projectService.getProject(projectOwnerUserId, projectAlias);
 
+        if(projectData.isEmpty()){
+            // TODO : Not found Exception
+            throw new WAIMException();
+        }
+
         return ResponseEntity.ok()
                 .body(
                         BaseResponse.Success.builder()
-                                .result(projectData)
+                                .result(projectData.get().castDataDto())
                                 .build()
                 );
     }
@@ -108,10 +114,15 @@ public class ProjectController {
     ){
         var projectData = projectService.getProject(projectUid);
 
+        if(projectData.isEmpty()){
+            // TODO : Not found Exception
+            throw new WAIMException();
+        }
+
         return ResponseEntity.ok()
                 .body(
                         BaseResponse.Success.builder()
-                                .result(projectData)
+                                .result(projectData.get().castDataDto())
                                 .build()
                 );
     }

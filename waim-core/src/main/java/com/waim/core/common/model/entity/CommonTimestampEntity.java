@@ -9,6 +9,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @MappedSuperclass // 테이블로 매핑되지 않고 자식 엔티티에게 매핑 정보만 제공
@@ -21,7 +22,7 @@ public abstract class CommonTimestampEntity {
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
             comment = "생성일"
     )
-    private LocalDateTime createAt;
+    private OffsetDateTime createAt;
 
     @UpdateTimestamp // 수정 시 자동 기록
     @Column(
@@ -29,7 +30,7 @@ public abstract class CommonTimestampEntity {
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
             comment = "마지막 수정일"
     )
-    private LocalDateTime updateAt;
+    private OffsetDateTime updateAt;
 
 
 }
