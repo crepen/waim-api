@@ -14,7 +14,7 @@
 
 ## Demo Site
 https://waim.crepen.kro.kr
- + DEMO ID : `demo`
+ + DEMO ID : `root`
  + DEMO PASSWORD : `qwer1234`
 
 
