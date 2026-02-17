@@ -35,6 +35,9 @@ dependencies {
     // Lombok (Core 모듈 내부용)
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 bootJar { enabled = false } // 실행 파일 생성 방지

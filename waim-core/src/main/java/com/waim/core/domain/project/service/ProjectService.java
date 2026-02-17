@@ -15,6 +15,7 @@ import com.waim.core.domain.project.repository.spec.ProjectSpecification;
 import com.waim.core.domain.user.model.entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.slf4j.Slf4j;
@@ -43,12 +44,36 @@ public class ProjectService {
      *
      * @return
      */
-    public Page<ProjectEntity> searchProjectPageable(ProjectSearchOption searchOption) {
 
-        return projectRepository.findAll(
-                ProjectSpecification.searchUserProject(searchOption.searchUserUid() , searchOption.searchKeyword()),
-                searchOption.pageable()
-        );
+    public Page<ProjectEntity> searchProjectPageable(ProjectSearchOption searchOption) {
+        Specification<ProjectEntity> spec = ((root, query, cb) -> {
+            query.distinct(true);
+            return cb.conjunction();
+        });
+
+        spec = spec.and((root, query, cb) -> {
+            Join<ProjectEntity, ProjectRoleEntity> projectRoleJoin = root.join("projectRoles", JoinType.INNER);
+            return cb.equal(projectRoleJoin.get("user").get("uid"), searchOption.searchUserUid());
+        });
+
+        if (StringUtils.hasText(searchOption.searchKeyword())) {
+            spec = spec.and((root, query, cb) -> {
+                String pattern = "%" + searchOption.searchKeyword().toLowerCase() + "%";
+
+                return cb.or(
+                        cb.like(cb.lower(root.get("projectAlias")), pattern),
+                        cb.like(cb.lower(root.get("projectName")), pattern)
+                );
+            });
+        }
+
+
+        spec = spec.and((root, query, cb) -> {
+             return cb.equal(root.get("projectStatus"), ProjectStatus.ACTIVE);
+        });
+
+
+        return projectRepository.findAll(spec, searchOption.pageable());
     }
 
 
@@ -151,8 +176,7 @@ public class ProjectService {
     public void removeProject(String projectUid , String actionUserUid){
 
         if(!StringUtils.hasText(projectUid)){
-            // TODO : UPDATE EXCEPTION
-            throw new WAIMException();
+            throw new WAIMException(ProjectErrorCode.PROJECT_UID_EMPTY);
         }
 
         Specification<ProjectEntity> spec = (root, query, cb) -> cb.equal(root.get("uid") , projectUid);
@@ -167,8 +191,7 @@ public class ProjectService {
         var matchProject = projectRepository.findOne(spec);
 
         if(matchProject.isEmpty()){
-            // TODO : UPDATE EXCEPTION
-            throw new WAIMException();
+            throw new WAIMException(ProjectErrorCode.PROJECT_NOT_FOUND);
         }
 
 
