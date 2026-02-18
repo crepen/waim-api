@@ -10,12 +10,14 @@ import com.waim.core.domain.project.model.dto.enumable.ProjectStatus;
 import com.waim.core.domain.project.model.entity.ProjectEntity;
 import com.waim.core.domain.project.model.entity.ProjectRoleEntity;
 import com.waim.core.domain.project.model.error.ProjectErrorCode;
+import com.waim.core.domain.project.model.error.ProjectUidUndefinedException;
 import com.waim.core.domain.project.repository.ProjectRepository;
 import com.waim.core.domain.project.repository.spec.ProjectSpecification;
 import com.waim.core.domain.user.model.entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.swing.text.html.Option;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
@@ -154,6 +157,40 @@ public class ProjectService {
         return projectRepository.findByUid(uid);
     }
 
+    public Optional<ProjectEntity> getActiveProject(String ownerUid) {
+        if(!StringUtils.hasText(ownerUid)){
+            throw new ProjectUidUndefinedException();
+        }
+
+        Specification<ProjectEntity> spec = ((root, query, cb) -> {
+            query.distinct(true);
+
+            Predicate predicate = cb.conjunction();
+            predicate = cb.and(predicate, cb.equal(root.get("projectOwner").get("uid"), ownerUid));
+            predicate = cb.and(predicate, cb.equal(root.get("projectStatus") , ProjectStatus.ACTIVE));
+            return predicate;
+        });
+
+        return projectRepository.findOne(spec);
+    }
+
+    public Optional<ProjectEntity> getActiveProjectUsingAliasAndOwnerUid(String alias, String ownerUid) {
+
+        Specification<ProjectEntity> spec = ((root, query, cb) -> {
+            query.distinct(true);
+
+            Predicate predicate = cb.conjunction();
+            predicate = cb.and(predicate, cb.equal(root.get("projectAlias"), alias));
+            predicate = cb.and(predicate, cb.equal(root.get("projectOwner").get("uid"), ownerUid));
+            predicate = cb.and(predicate, cb.equal(root.get("projectStatus") , ProjectStatus.ACTIVE));
+
+            return predicate;
+        });
+
+        return projectRepository.findOne(spec);
+    }
+
+
     /**
      * <h3>프로젝트 정보 조회</h3>
      * <p>
@@ -167,9 +204,7 @@ public class ProjectService {
 
         // TODO : Validation check
 
-        var searchProject = projectRepository.findOne(ProjectSpecification.searchUserProjectAlias(userId, projectAlias));
-
-        return searchProject;
+        return projectRepository.findOne(ProjectSpecification.searchUserProjectAlias(userId, projectAlias));
     }
 
     @Transactional

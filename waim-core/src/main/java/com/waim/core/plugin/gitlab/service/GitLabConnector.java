@@ -1,12 +1,18 @@
 package com.waim.core.plugin.gitlab.service;
 
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.waim.core.plugin.gitlab.model.dto.GitLabConnectOption;
 import com.waim.core.plugin.gitlab.model.dto.response.GitLabApiResponse;
+import com.waim.core.plugin.gitlab.model.error.GitLabApiUnknownException;
 import com.waim.core.plugin.gitlab.model.error.GitLabConnException;
 import com.waim.core.plugin.gitlab.model.error.GitLabPluginException;
+import com.waim.core.plugin.gitlab.model.error.GitLabUnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.type.internal.ParameterizedTypeImpl;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -23,13 +29,9 @@ public class GitLabConnector {
         this.webClient = WebClient.builder().baseUrl(gitlabBaseUrl).build();
     }
 
-    public <T> GitLabApiResponse<List<T>> getDataList(String endpoint, GitLabConnectOption option, Class<T> responseClass) {
+    public <T> List<T> getDataList(String endpoint, GitLabConnectOption option, Class<T> responseClass) {
         ParameterizedTypeReference<List<T>> typeRef = ParameterizedTypeReference.forType(
-                new ParameterizedType() {
-                    @Override public Type[] getActualTypeArguments() { return new Type[]{responseClass}; }
-                    @Override public Type getRawType() { return List.class; }
-                    @Override public Type getOwnerType() { return null; }
-                }
+                ResolvableType.forClassWithGenerics(List.class, responseClass).getType()
         );
 
         return this.webClient.get()
@@ -37,44 +39,54 @@ public class GitLabConnector {
                 .header("PRIVATE-TOKEN", option.token())
                 .exchangeToMono(response -> {
                     if (response.statusCode().is2xxSuccessful()) {
-                        return response.bodyToMono(typeRef)
-                                .map(data -> new GitLabApiResponse<>(true, data));
+                        return response.bodyToMono(typeRef);
                     } else {
                         return response.bodyToMono(Map.class)
                                 .defaultIfEmpty(Map.of("message", "No error message provided"))
                                 .flatMap(error -> {
                                     String msg = String.valueOf(Map.of("message", "Unknown GitLab API Error"));
-                                    return Mono.error(new GitLabPluginException(msg, response.statusCode().value()));
+
+                                    if(response.statusCode() == HttpStatus.UNAUTHORIZED){
+                                        return Mono.error(new GitLabUnauthorizedException());
+                                    }
+                                    else{
+                                        return Mono.error(new GitLabApiUnknownException(msg));
+                                    }
                                 });
                     }
                 })
                 .onErrorResume(e -> {
                     if (e instanceof GitLabPluginException) return Mono.error(e);
-                    return Mono.error(new GitLabConnException("GitLab Connection Failed: " + e.getMessage(), e));
+                    return Mono.error(new GitLabConnException(e));
                 })
                 .block();
     }
 
-    public <T> GitLabApiResponse<T> getData(String endpoint, GitLabConnectOption option, Class<T> responseClass) {
+    public <T> T getData(String endpoint, GitLabConnectOption option, Class<T> responseClass) {
         return this.webClient.get()
                 .uri(endpoint)
                 .header("PRIVATE-TOKEN", option.token())
                 .exchangeToMono(response -> {
                     if (response.statusCode().is2xxSuccessful()) {
-                        return response.bodyToMono(responseClass)
-                                .map(data -> new GitLabApiResponse<>(true, data));
+                        return response.bodyToMono(responseClass);
                     } else {
-                        return response.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                        return response.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                                })
                                 .defaultIfEmpty(Map.of("message", "No error message provided"))
                                 .flatMap(error -> {
                                     String msg = String.valueOf(error.getOrDefault("message", "Unknown GitLab API Error"));
-                                    return Mono.error(new GitLabPluginException(msg, response.statusCode().value()));
+
+                                    if (response.statusCode() == HttpStatus.UNAUTHORIZED) {
+                                        return Mono.error(new GitLabUnauthorizedException());
+                                    } else {
+                                        return Mono.error(new GitLabApiUnknownException(msg));
+                                    }
                                 });
                     }
                 })
                 .onErrorResume(e -> {
                     if (e instanceof GitLabPluginException) return Mono.error(e);
-                    return Mono.error(new GitLabConnException("GitLab Connection Failed: " + e.getMessage(), e));
+                    return Mono.error(new GitLabConnException(e));
                 })
                 .block();
     }

@@ -12,6 +12,7 @@ import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
+@Deprecated
 public class WAIMException extends RuntimeException{
     @Serial
     private static final long serialVersionUID = 1L;
@@ -24,6 +25,8 @@ public class WAIMException extends RuntimeException{
         super(errorCode.getMessage());
         this.errorCode = errorCode;
         this.httpStatus = errorCode.getHttpStatus();
+
+
     }
 
     public WAIMException(final WAIMErrorCode errorCode, final String ...messageArgs) {

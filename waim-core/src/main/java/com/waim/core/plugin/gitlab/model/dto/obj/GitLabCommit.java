@@ -1,4 +1,4 @@
-package com.waim.core.plugin.gitlab.model.dto;
+package com.waim.core.plugin.gitlab.model.dto.obj;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
