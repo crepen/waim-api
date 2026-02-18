@@ -157,7 +157,7 @@ public class ProjectService {
         return projectRepository.findByUid(uid);
     }
 
-    public Optional<ProjectEntity> getActiveProject(String ownerUid) {
+    public Optional<ProjectEntity> getActiveProject(String ownerUid , String projectUid) {
         if(!StringUtils.hasText(ownerUid)){
             throw new ProjectUidUndefinedException();
         }
@@ -166,6 +166,7 @@ public class ProjectService {
             query.distinct(true);
 
             Predicate predicate = cb.conjunction();
+            predicate = cb.and(predicate , cb.equal(root.get("uid") , projectUid));
             predicate = cb.and(predicate, cb.equal(root.get("projectOwner").get("uid"), ownerUid));
             predicate = cb.and(predicate, cb.equal(root.get("projectStatus") , ProjectStatus.ACTIVE));
             return predicate;

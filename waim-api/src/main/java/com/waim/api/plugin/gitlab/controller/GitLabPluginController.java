@@ -4,7 +4,9 @@ import com.waim.api.common.model.response.BaseResponse;
 import com.waim.api.plugin.gitlab.model.request.GitLabTestConnectRequest;
 import com.waim.api.plugin.gitlab.model.request.UpdateGitLabConfigRequest;
 import com.waim.api.plugin.gitlab.model.response.GitLabIntegrationDataResponse;
+import com.waim.core.common.model.dto.ConfigItem;
 import com.waim.core.common.util.jwt.model.JwtUserDetail;
+import com.waim.core.domain.project.model.entity.ProjectConfigEntity;
 import com.waim.core.plugin.gitlab.model.dto.obj.GitLabProject;
 import com.waim.core.plugin.gitlab.model.error.GitLabProjectNotFoundException;
 import com.waim.core.plugin.gitlab.service.GitLabApiService;
@@ -28,6 +30,9 @@ public class GitLabPluginController {
     private final GitLabApiService gitLabApiService;
     private final GitLabPluginService gitLabPluginService;
 
+    /**
+     * <h3>GitLab Project 연결 체크</h3>
+     */
     @PostMapping("connect")
     public ResponseEntity<?> testConnect(
             @RequestBody GitLabTestConnectRequest reqBody
@@ -49,10 +54,14 @@ public class GitLabPluginController {
         );
     }
 
+
     /**
-     * WAIM 프로젝트와 연결된 Gitlab 프로젝트 데이터 조회
+     * <h3>메인 프로젝트와 연결된 GitLab Project 정보 조회</h3>
      *
-     * @return
+     * <ul>
+     *     <li>Last Commit Data</li>
+     *     <li>Last Pipeline Data</li>
+     * </ul>
      */
     @GetMapping("/itg/{projectAlias}")
     public ResponseEntity<?> getIntegrationGitLabData(
@@ -101,7 +110,16 @@ public class GitLabPluginController {
     }
 
 
-    @PostMapping("/{projectAlias}/config")
+    /**
+     * <h3>메인 프로젝트 - Gitlab plugin 설정 등록</h3>
+     *
+     * <ul>
+     *     <li>GitLab Base URL</li>
+     *     <li>GitLab Project ID</li>
+     *     <li>GitLab Project Access Token</li>
+     * </ul>
+     */
+    @PostMapping("/itg/{projectAlias}/config")
     public ResponseEntity<?> setGitLabConfig(
             @AuthenticationPrincipal JwtUserDetail userDetail,
             @PathVariable String projectAlias,
@@ -115,11 +133,39 @@ public class GitLabPluginController {
                 projectAlias
         );
 
-        return ResponseEntity.ok()
-                .body(
-                        BaseResponse.Success.builder()
-                                .build()
-                );
+        return ResponseEntity.ok(
+                BaseResponse.Success.builder()
+                        .build()
+        );
+
+    }
+
+
+    /**
+     * <h3>메인 프로젝트 - Gitlab plugin 설정 조회</h3>
+     */
+    @GetMapping("/itg/{projectAlias}/config")
+    public ResponseEntity<?> getGitLabConfig(
+            @AuthenticationPrincipal JwtUserDetail userDetail,
+            @PathVariable String projectAlias
+    ) {
+
+        List<ProjectConfigEntity> config = gitLabPluginService.getGitLabPluginProjectConfigUseProjectAlias(
+                userDetail.getUserUid(),
+                projectAlias,
+                true
+        );
+
+        return ResponseEntity.ok(
+                BaseResponse.Success.builder()
+                        .result(
+                                config.stream()
+                                        .map(ProjectConfigEntity::castConfigItem)
+                                        .toList()
+                        )
+                        .build()
+        );
+
     }
 
 }

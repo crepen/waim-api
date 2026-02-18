@@ -2,6 +2,7 @@ package com.waim.core.domain.project.model.entity;
 
 
 import com.waim.core.common.config.converter.DataCryptoConverter;
+import com.waim.core.common.model.dto.ConfigItem;
 import com.waim.core.common.model.entity.CommonTimestampEntity;
 import com.waim.core.domain.project.model.entity.id.ProjectConfigId;
 import com.waim.core.domain.project.service.listener.ProjectConfigEventListener;
@@ -49,6 +50,14 @@ public class ProjectConfigEntity extends CommonTimestampEntity {
     @Convert(converter = DataCryptoConverter.class)
     private String configValue;
 
+    @Builder.Default
+    @Column(
+            name = "secure" , nullable = false , length = 1,
+            columnDefinition = "TINYINT(1) DEFAULT 0",
+            comment = "프로젝트 설정 보안 여부"
+    )
+    private boolean secure = false;
+
     @PrePersist
     protected void onCreate() {
 
@@ -57,5 +66,13 @@ public class ProjectConfigEntity extends CommonTimestampEntity {
     @PreUpdate
     protected void onUpdate() {
 
+    }
+
+
+
+
+
+    public ConfigItem castConfigItem(){
+        return new ConfigItem(this.configKey  , this.configValue , this.secure);
     }
 }

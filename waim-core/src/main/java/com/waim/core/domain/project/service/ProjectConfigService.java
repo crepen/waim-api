@@ -1,5 +1,6 @@
 package com.waim.core.domain.project.service;
 
+import com.waim.core.common.model.dto.ConfigItem;
 import com.waim.core.common.util.crypto.CryptoProvider;
 import com.waim.core.domain.project.model.entity.ProjectConfigEntity;
 import com.waim.core.domain.project.model.entity.ProjectEntity;
@@ -36,7 +37,15 @@ public class ProjectConfigService {
         return projectConfigRepository.findAll(spec);
     }
 
-    public List<ProjectConfigEntity> getConfigs(String projectUid , String... configKeys){
+    public List<ProjectConfigEntity> getConfigs(
+            String projectUid , String... configKeys
+    ){
+        return getConfigs(projectUid , false , configKeys);
+    }
+
+    public List<ProjectConfigEntity> getConfigs(
+            String projectUid , boolean maskingSecureValue , String... configKeys
+    ){
 
         if(configKeys.length == 0){
             return new ArrayList<>();
@@ -53,15 +62,28 @@ public class ProjectConfigService {
             return cb.and(projectPredicate, inClause);
         };
 
+        var result = projectConfigRepository.findAll(spec);
 
-        return projectConfigRepository.findAll(spec);
+        if(maskingSecureValue){
+            result = result.stream().peek(x->{
+                if(x.isSecure()){
+                    x.setConfigValue("[SECURE VALUE]");
+                }
+            }).toList();
+        }
+
+        return result;
     }
 
     public Optional<ProjectConfigEntity> getConfig(String projectUid , String configKey){
+        return getConfig(projectUid , false , configKey);
+    }
+
+    public Optional<ProjectConfigEntity> getConfig(String projectUid , boolean maskingSecureValue,  String configKey){
         if(configKey == null){
             return Optional.empty();
         }
-        var findDataList = this.getConfigs(projectUid , configKey);
+        var findDataList = this.getConfigs(projectUid , maskingSecureValue , configKey);
 
         if(findDataList.isEmpty()){
             return Optional.empty();
@@ -71,33 +93,34 @@ public class ProjectConfigService {
         }
     }
 
-    public void setConfigs(String projectAlias , String userUid , Map<String , String> configItem){
+    public void setConfigsUserProjectAlias(String projectAlias , String userUid , List<ConfigItem> configItem){
         Optional<ProjectEntity> projectEntity = projectService.getActiveProjectUsingAliasAndOwnerUid(
                 projectAlias, userUid
         );
         setConfigs(projectEntity , configItem);
     }
 
-    public void setConfigs(String projectUid , Map<String , String> configItem){
-        Optional<ProjectEntity> projectEntity = projectService.getActiveProject(projectUid);
+    public void setConfigsUseProjectUid(String projectUid ,String userUid ,  List<ConfigItem> configItem){
+        Optional<ProjectEntity> projectEntity = projectService.getActiveProject(userUid , projectUid);
         setConfigs(projectEntity, configItem);
     }
 
-    public void setConfigs(Optional<ProjectEntity> project, Map<String , String> configItem) {
+    public void setConfigs(Optional<ProjectEntity> project, List<ConfigItem> configItem) {
 
         if (project.isEmpty()) {
             throw new ProjectNotFoundException();
         }
 
-        List<ProjectConfigEntity> configs = configItem.entrySet().stream()
-                .map(entry ->
+        List<ProjectConfigEntity> configs =
+                configItem.stream().map(entry ->
                         ProjectConfigEntity.builder()
                                 .project(project.get())        // 연관된 프로젝트 엔티티 설정
-                                .configKey(entry.getKey())
-                                .configValue(entry.getValue())
+                                .configKey(entry.key())
+                                .configValue(entry.value())
+                                .secure(entry.secure())
                                 .build()
-                )
-                .toList();
+                ).toList();
+
 
         projectConfigRepository.saveAll(configs);
     }

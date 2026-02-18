@@ -1,5 +1,6 @@
 package com.waim.core.plugin.gitlab.service;
 
+import com.waim.core.common.model.dto.ConfigItem;
 import com.waim.core.common.model.error.PlatformUnknownException;
 import com.waim.core.domain.project.model.entity.ProjectConfigEntity;
 import com.waim.core.domain.project.model.entity.ProjectEntity;
@@ -13,13 +14,10 @@ import com.waim.core.plugin.gitlab.model.dto.obj.GitLabProject;
 import com.waim.core.plugin.gitlab.model.enumable.GitLabValidateError;
 import com.waim.core.plugin.gitlab.model.error.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -109,6 +107,36 @@ public class GitLabPluginService {
 
     }
 
+    public List<ProjectConfigEntity> getGitLabPluginProjectConfigUseProjectAlias(
+            String userUid , String projectAlias , boolean maskingSecureValue
+    ) {
+        Optional<ProjectEntity> projectEntity = projectService.getActiveProjectUsingAliasAndOwnerUid(projectAlias , userUid);
+        return getGitLabPluginProjectConfig(projectEntity , maskingSecureValue);
+    }
+
+    public List<ProjectConfigEntity> getGitLabPluginProjectConfigUseProjectUid(
+            String userUid , String projectUid , boolean maskingSecureValue
+    ){
+        Optional<ProjectEntity> projectEntity = projectService.getActiveProject(userUid, projectUid);
+        return getGitLabPluginProjectConfig(projectEntity , maskingSecureValue);
+    }
+
+    public List<ProjectConfigEntity> getGitLabPluginProjectConfig(
+            Optional<ProjectEntity> project, boolean maskingSecureValue
+    ){
+        if(project.isEmpty()){
+            throw new ProjectNotFoundException();
+        }
+
+        return projectConfigService.getConfigs(
+                project.get().getUid(),
+                maskingSecureValue,
+                "PLUGIN_INTEGRATION_GITLAB_URL",
+                "PLUGIN_INTEGRATION_GITLAB_PROJECT_ID",
+                "PLUGIN_INTEGRATION_GITLAB_TOKEN"
+        );
+    }
+
 
     public void setGitLabPluginProjectConfig(
             String baseUrl,
@@ -130,11 +158,13 @@ public class GitLabPluginService {
         }
 
 
+        List<ConfigItem> configItems = new ArrayList<>();
 
-        Map<String, String> configMap = new HashMap<>();
-        configMap.put("PLUGIN_INTEGRATION_GITLAB_URL", baseUrl);
-        configMap.put("PLUGIN_INTEGRATION_GITLAB_PROJECT_ID", String.valueOf(projectId));
-        configMap.put("PLUGIN_INTEGRATION_GITLAB_TOKEN", token);
+        configItems.add(new ConfigItem("PLUGIN_INTEGRATION_GITLAB_URL", baseUrl , false));
+        configItems.add(new ConfigItem("PLUGIN_INTEGRATION_GITLAB_PROJECT_ID", String.valueOf(projectId) , false));
+        configItems.add(new ConfigItem("PLUGIN_INTEGRATION_GITLAB_TOKEN", token , true));
+
+
 
         try{
             List<GitLabProject> tokenProjects = gitLabApiService.getTokenProjects(
@@ -148,7 +178,7 @@ public class GitLabPluginService {
                 throw new GitLabProjectNotFoundException();
             }
 
-            projectConfigService.setConfigs(projectAlias , userUid , configMap);
+            projectConfigService.setConfigsUserProjectAlias(projectAlias , userUid , configItems);
         }
         catch (GitLabPluginException gpex){
             throw gpex;
