@@ -14,10 +14,14 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = 'waim'
-include ':module:waim-core'
-include ':service:web-api', ':service:waim-scheduler', ':service:task-master', ':service:task-worker'
-include 'module:module-task'
-findProject(':module:module-task')?.name = 'module.task'
-include 'module:module.config'
-findProject(':module:module.config')?.name = 'module.config'
 
+
+
+include ':module:waim-core'
+include ':module:storage'
+include ':module:config' , ':module:domain:task'
+include ':service:web-api', ':service:waim-scheduler', ':service:task-master', ':service:task-worker'
+
+
+
+project(':module:config').projectDir = file('module/module-config')

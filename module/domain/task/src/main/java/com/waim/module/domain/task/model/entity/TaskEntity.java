@@ -1,4 +1,4 @@
-package com.waim.module.task.model.entity;
+package com.waim.module.domain.task.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,4 +15,7 @@ public class TaskEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "uid" , length = 36)
     private String uid;
+
+    @Column(name = "project_uid")
+    private String projectUid;
 }

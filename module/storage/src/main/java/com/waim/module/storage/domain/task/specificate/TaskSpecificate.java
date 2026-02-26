@@ -1,2 +1,4 @@
-package com.waim.module.storage.domain.task.specificate;public class TaskSpecificate {
+package com.waim.module.storage.domain.task.specificate;
+
+public class TaskSpecificate {
 }

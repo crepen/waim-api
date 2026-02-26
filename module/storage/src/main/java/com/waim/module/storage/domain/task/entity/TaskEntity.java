@@ -1,4 +1,4 @@
-package com.waim.module.storage.domain.task.model.entity;
+package com.waim.module.storage.domain.task.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
