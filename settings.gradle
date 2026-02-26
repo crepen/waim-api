@@ -18,7 +18,7 @@ rootProject.name = 'waim'
 
 
 include ':module:waim-core'
-include ':module:storage'
+include ':module:storage', ':module:util'
 include ':module:config' , ':module:domain:task'
 include ':service:web-api', ':service:waim-scheduler', ':service:task-master', ':service:task-worker'
 

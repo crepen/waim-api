@@ -9,6 +9,11 @@ dependencyManagement {
 }
 
 dependencies {
+
+    implementation project(':module:util')
+
+
+
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
 
 

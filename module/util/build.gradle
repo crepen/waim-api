@@ -1,0 +1,31 @@
+plugins {
+    id 'java-library'
+}
+
+//dependencyManagement {
+//    imports {
+//        mavenBom "org.springframework.boot:spring-boot-dependencies:4.0.1"
+//    }
+//}
+
+dependencies {
+
+    // StringUtils 등 Util
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
+
+    // Lombok (Core 모듈 내부용)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // TextEncryptor
+    implementation 'org.springframework.security:spring-security-crypto'
+    implementation 'commons-logging:commons-logging:1.2'
+
+
+}
+
+
+
+
+bootJar { enabled = false } // 실행 파일 생성 방지
+jar { enabled = true }      // 라이브러리 jar 생성
