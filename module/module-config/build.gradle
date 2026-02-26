@@ -1,0 +1,25 @@
+plugins {
+    id 'java-library'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:4.0.1"
+    }
+}
+
+dependencies {
+    // Spring Boot Starter (버전 명시 없이 BOM 관리 유도)
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    api 'org.springframework.boot:spring-boot-starter-security'
+
+    // Lombok (Core 모듈 내부용)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+}
+
+bootJar { enabled = false } // 실행 파일 생성 방지
+jar { enabled = true }      // 라이브러리 jar 생성
