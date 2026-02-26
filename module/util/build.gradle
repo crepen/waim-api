@@ -26,8 +26,6 @@ dependencies {
     implementation 'org.springframework:spring-web:7.0.2'
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
 
-    // Security
-    implementation 'org.springframework.security:spring-security-core:6.4.2'
 
 }
 
