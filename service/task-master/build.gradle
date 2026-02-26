@@ -1,5 +1,5 @@
 dependencies {
-    implementation project(':module:waim-core')
+    implementation project(':module:domain:task')
 
     // Valkey(Redis 호환) 조회
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
@@ -12,7 +12,6 @@ dependencies {
     // Scheduler Lock
     implementation 'net.javacrumbs.shedlock:shedlock-spring:6.2.0'
     implementation 'net.javacrumbs.shedlock:shedlock-provider-redis-spring:6.2.0'
-    implementation 'org.redisson:redisson-spring-boot-starter:3.35.0'
 
 
     // Jasypt
@@ -25,6 +24,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
 
 }

@@ -1,54 +1,64 @@
 package com.waim.taskmaster.scheduler;
 
+import com.waim.module.domain.task.service.TaskService;
+import com.waim.module.storage.domain.task.entity.TaskAttributeEntity;
+import com.waim.module.storage.domain.task.entity.TaskEntity;
+import com.waim.module.storage.domain.task.repository.TaskRepository;
 import com.waim.taskmaster.config.RabbitConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.convert.DurationStyle;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.time.ZoneOffset;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class TaskDispatcher {
 
+
     private final RabbitTemplate rabbitTemplate;
-//    private final TaskRepository taskRepository;
+    private final TaskService taskService;
+    private final TaskRepository taskRepository;
 
 
     @Scheduled(fixedDelay = 10000)
     @SchedulerLock(name = "master_dispatch_lock" , lockAtMostFor = "9s" , lockAtLeastFor = "5s")
+    @Transactional
     public void dispatchTask(){
-        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
+        List<TaskEntity> taskEntities = taskService.getActiveTask();
 
+        for(TaskEntity taskEntity : taskEntities){
+            try{
+                Duration delayDuration = DurationStyle.SIMPLE.parse(taskEntity.getIntervalDelay());
+                OffsetDateTime nextRun = now.plus(delayDuration);
 
+                rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_NAME, RabbitConfig.ROUTING_KEY , taskEntity.getUid());
+                log.info("TASK DISPATCH : {} -> {}" , taskEntity.getTaskType() , taskEntity.getUid());
 
+                for(TaskAttributeEntity attr : taskEntity.getTaskAttributes()){
+                    log.info(" - {} : {}" , attr.getAttrKey() , attr.getAttrValue());
+                }
 
+                taskEntity.setNextRunTimestamp(nextRun);
 
-        for(var i=0;i<10;i++){
-            String uid = String.format("[%s][%d] %s" , now.toString() , i , UUID.randomUUID().toString());
-            log.info("RABBIT_MQ_SEND_MESSAGE : {}" , uid);
-            rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_NAME, RabbitConfig.ROUTING_KEY , uid);
+                taskRepository.save(taskEntity);
+            }
+            catch (Exception ex){
+                log.error("Dispatch Error : {} -> {}", taskEntity.getUid(),ex.getMessage());
+            }
+
         }
 
-
-        // 실행 주기(interval)에 도달한 Task 목록 조회
-//        List<TaskEntity> tasksToRun = taskRepository.findTasksToExecute(now);
-//
-//        for (TaskEntity task : tasksToRun) {
-//            // RabbitMQ의 특정 Exchange로 Task ID 전송
-//            rabbitTemplate.convertAndSend("task.exchange", "task.routing.key", task.getTaskId());
-//
-//            // 마지막 실행 시간 업데이트
-//            task.setLastRunAt(now);
-//            taskRepository.save(task);
-//
-//            System.out.println("Dispatched Task: " + task.getTaskId());
-//        }
     }
 }

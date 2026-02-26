@@ -5,6 +5,11 @@ spring:
   config:
     import: classpath:waim-local.yml
 
+  datasource:
+    url: jdbc:mariadb://localhost:3306/waim?serverTimezone=UTC&forceConnectionTimeZone=true&connectionTimeZone=UTC
+    username: waimadm
+    password: crependev1!
+
   data:
     redis:
       host: localhost
@@ -25,3 +30,7 @@ spring:
     port: 15677
     username: admin
     password: admin_password
+
+  jpa:
+    hibernate:
+      ddl-auto: update

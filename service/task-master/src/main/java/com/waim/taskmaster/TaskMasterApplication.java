@@ -2,19 +2,17 @@ package com.waim.taskmaster;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.persistence.autoconfigure.EntityScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(
-    scanBasePackages = "com.waim",
-    exclude = {
-        org.redisson.spring.starter.RedissonAutoConfigurationV2.class
+    scanBasePackages = {
+            "com.waim.taskmaster",
+            "com.waim.module.domain.task"
     }
 )
-@EnableJpaRepositories(basePackages = "com.waim.core")
-@EntityScan(basePackages = "com.waim.core")
 @EnableScheduling
+@EnableAsync
 public class TaskMasterApplication {
 
     public static void main(String[] args) {

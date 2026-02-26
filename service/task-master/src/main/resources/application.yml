@@ -1,13 +1,23 @@
 spring:
   application:
     name: task-master
-  datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/waim
-    username: waimadm
-    password: crependev1!
   config:
     import: classpath:waim.yml
+
+
+
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+
   data:
     redis:
       connect-timeout: 2000ms
