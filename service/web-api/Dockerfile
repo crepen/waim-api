@@ -7,14 +7,12 @@ COPY build.gradle .
 COPY settings.gradle .
 
 ## COPY PACKAGE
-COPY module/waim-core module/waim-core
-
 COPY service service
 COPY module module
 
 
-RUN chmod +x ./gradlew && ./gradlew :waim-api:bootJar --no-daemon
-RUN java -Djarmode=layertools -jar waim-api/build/libs/*.jar extract
+RUN chmod +x ./gradlew && ./gradlew :web-api:bootJar --no-daemon
+RUN java -Djarmode=layertools -jar web-api/build/libs/*.jar extract
 
 # 2단계: 최종 실행 스테이지
 FROM eclipse-temurin:25-jre-alpine
