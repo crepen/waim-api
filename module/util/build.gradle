@@ -11,7 +11,7 @@ plugins {
 dependencies {
 
     // StringUtils 등 Util
-    implementation 'org.apache.commons:commons-lang3:3.17.0'
+    implementation 'org.apache.commons:commons-lang3:3.18.0'
 
     // Lombok (Core 모듈 내부용)
     compileOnly 'org.projectlombok:lombok'
