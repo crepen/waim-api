@@ -13,9 +13,13 @@ dependencies {
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.springframework.boot:spring-boot-starter-security'
 
+
     // Lombok (Core 모듈 내부용)
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // Jasypt
+    implementation 'org.jasypt:jasypt:1.9.3'
 
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'

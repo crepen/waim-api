@@ -1,5 +1,6 @@
 dependencies {
     implementation project(':module:domain:task')
+    implementation project(':module:config')
 
     // Valkey(Redis 호환) 조회
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'

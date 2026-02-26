@@ -1,15 +1,16 @@
-package com.waim.taskmaster.config;
+package com.waim.module.config.jasypt;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
 public class JasyptConfig {
+
 
     @Bean("jasyptStringEncryptor")
     public StringEncryptor stringEncryptor() {
