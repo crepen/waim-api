@@ -21,7 +21,7 @@ image-api:
       docker build 
       -t $WAIM_NEXUS_API_IMAGE:$CI_COMMIT_SHORT_SHA
       -t $WAIM_NEXUS_API_IMAGE:latest 
-      -f waim-api/Dockerfile .
+      -f service/web-api/Dockerfile .
     # PUSH IMAGE
     - echo "Pushing Image to Nexus...."
     - docker push $WAIM_NEXUS_API_IMAGE:$CI_COMMIT_SHORT_SHA
