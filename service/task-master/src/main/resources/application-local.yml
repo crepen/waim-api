@@ -1,0 +1,27 @@
+server:
+  port: 18080
+
+spring:
+  config:
+    import: classpath:waim-local.yml
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: qwer1234
+      connect-timeout: 5000ms
+      timeout: 3000ms
+      client-type: lettuce
+      lettuce:
+        shutdown-timeout: 500ms
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  rabbitmq:
+    host: localhost
+    port: 15677
+    username: admin
+    password: admin_password

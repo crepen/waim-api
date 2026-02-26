@@ -1,0 +1,9 @@
+waim:
+  crypto:
+    key: G7h2P9wX4kL1mN5bV8zQ3rT6yU0jS4iA
+    salt: a1b2c3d4e5f67890a1b2c3d4e5f67890
+
+  jwt:
+    secret: z7B9x2W4rQ8nM1pL5kJ3hG6fD9sA2vC4bN7mK0oI8uY6tR4eE2wQ1qA9zX8cV7bN
+    expiration: 300000
+    refresh-expiration: 604800000

@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: task-worker
+  config:
+    import: classpath:waim.yml
+  datasource:
+    hikari:
+      connection-timeout: 3000
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+server:
+  port: 8083
