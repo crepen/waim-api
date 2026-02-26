@@ -5,14 +5,17 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="ms-21" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/task-master" />
-            <option value="$PROJECT_DIR$/task-worker" />
-            <option value="$PROJECT_DIR$/waim-api" />
-            <option value="$PROJECT_DIR$/waim-core" />
-            <option value="$PROJECT_DIR$/waim-scheduler" />
+            <option value="$PROJECT_DIR$/module" />
+            <option value="$PROJECT_DIR$/module/waim-core" />
+            <option value="$PROJECT_DIR$/service" />
+            <option value="$PROJECT_DIR$/service/task-master" />
+            <option value="$PROJECT_DIR$/service/task-worker" />
+            <option value="$PROJECT_DIR$/service/waim-scheduler" />
+            <option value="$PROJECT_DIR$/service/web-api" />
           </set>
         </option>
       </GradleProjectSettings>

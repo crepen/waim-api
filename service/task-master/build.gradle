@@ -1,5 +1,5 @@
 dependencies {
-    implementation project(':waim-core')
+    implementation project(':module:waim-core')
 
     // Valkey(Redis 호환) 조회
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'

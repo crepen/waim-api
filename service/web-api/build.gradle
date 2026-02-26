@@ -1,5 +1,5 @@
 dependencies {
-    implementation project(':waim-core')
+    implementation project(':module:waim-core')
 
     // Spring Boot Starters (버전 선언 제거)
     implementation 'org.springframework.boot:spring-boot-starter-web'
