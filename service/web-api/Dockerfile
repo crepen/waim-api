@@ -8,8 +8,10 @@ COPY settings.gradle .
 
 ## COPY PACKAGE
 COPY module/waim-core module/waim-core
-COPY service/web-api service/web-api
-COPY service/waim-scheduler service/waim-scheduler
+
+COPY service service
+COPY module module
+
 
 RUN chmod +x ./gradlew && ./gradlew :waim-api:bootJar --no-daemon
 RUN java -Djarmode=layertools -jar waim-api/build/libs/*.jar extract
