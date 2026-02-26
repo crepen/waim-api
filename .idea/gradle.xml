@@ -8,6 +8,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/task-master" />
+            <option value="$PROJECT_DIR$/task-worker" />
             <option value="$PROJECT_DIR$/waim-api" />
             <option value="$PROJECT_DIR$/waim-core" />
             <option value="$PROJECT_DIR$/waim-scheduler" />

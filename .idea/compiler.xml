@@ -15,8 +15,10 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.42/8365263844ebb62398e0dc33057ba10ba472d3b8/lombok-1.18.42.jar" />
         </processorPath>
-        <module name="waim.waim-core.main" />
         <module name="waim.waim-scheduler.main" />
+        <module name="waim.task-master.main" />
+        <module name="waim.task-worker.main" />
+        <module name="waim.waim-core.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="25" />
