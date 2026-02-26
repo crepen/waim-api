@@ -40,7 +40,7 @@ image-schedule:
       docker build 
       -t $WAIM_NEXUS_SCH_IMAGE:$CI_COMMIT_SHORT_SHA
       -t $WAIM_NEXUS_SCH_IMAGE:latest 
-      -f waim-scheduler/Dockerfile .
+      -f service/waim-scheduler/Dockerfile .
     # PUSH IMAGE
     - echo "Pushing Image to Nexus...."
     - docker push $WAIM_NEXUS_SCH_IMAGE:$CI_COMMIT_SHORT_SHA
