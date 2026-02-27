@@ -24,16 +24,3 @@ https://waim.crepen.kro.kr
 | ------------- | ----------------------------------------- |
 | API Server    |  https://github.com/crepen/waim-api       |
 | Client        |  https://github.com/crepen/waim-client    |
-
-# dd 
-
-```mermaid
-flowchart TD
-    A[Christmas] -->|Get money| B(Go shopping)
-    B --> C{Let me think}
-    C -->|One| D[Laptop]
-    C -->|Two| E[iPhone]
-    C -->|Three| F[fa:fa-car Car]
-```
-
-  
