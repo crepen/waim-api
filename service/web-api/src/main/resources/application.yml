@@ -111,6 +111,3 @@ logging:
     root: INFO
     com.waim: info
 
-jasypt:
-  encryptor:
-    password: ${JASYPT_PASSWORD}

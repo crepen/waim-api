@@ -1,7 +1,7 @@
 package com.waim.api.common.config.handler;
 
 import com.waim.api.common.model.response.BaseResponse;
-import com.waim.core.common.model.error.PlatformException;
+import com.waim.module.core.common.model.error.ServerException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -23,9 +23,10 @@ public class PlatformExceptionHandler {
 
     private final MessageSource messageSource;
 
-    @ExceptionHandler(PlatformException.class)
-    public ResponseEntity<?> handlePlatformException(
-            PlatformException ex
+
+    @ExceptionHandler(ServerException.class)
+    public ResponseEntity<?> serverException(
+            final ServerException ex
     ) {
         Locale locale = LocaleContextHolder.getLocale();
 
@@ -44,11 +45,12 @@ public class PlatformExceptionHandler {
         return ResponseEntity
                 .status(ex.getStatusCode())
                 .body(
-                        BaseResponse.Error.builder()
-                                .code(ex.getErrorCode()) // 적절한 공통 코드 사용
+                        BaseResponse.Error
+                                .builder()
+                                .code(ex.getErrorCode())
                                 .message(
                                         messageSource.getMessage(
-                                                ex.getMessage(),
+                                                ex.getLocaleMessageCode(),
                                                 castLocaleArgs,
                                                 ex.getMessage(),
                                                 locale
@@ -57,4 +59,6 @@ public class PlatformExceptionHandler {
                                 .build()
                 );
     }
+
+
 }

@@ -3,12 +3,12 @@ package com.waim.api.domain.project.config.secure;
 import com.waim.api.common.config.security.filter.JwtSecurityFilter;
 import com.waim.api.common.config.security.handler.SecurityAccessDeniedHandler;
 import com.waim.api.common.config.security.handler.SecurityAuthenticationEntryPoint;
-import com.waim.core.common.util.jwt.JwtTokenProvider;
+import com.waim.module.core.domain.user.service.UserService;
+import com.waim.module.util.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,7 +18,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @RequiredArgsConstructor
 public class ProjectModuleSecurityConfig {
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtProvider jwtTokenProvider;
+    private final UserService userService;
     private final SecurityAuthenticationEntryPoint authenticationEntryPoint;
     private final SecurityAccessDeniedHandler securityAccessDeniedHandler;
 
@@ -39,7 +40,7 @@ public class ProjectModuleSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JwtSecurityFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtSecurityFilter(jwtTokenProvider , userService), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(handler -> handler
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(securityAccessDeniedHandler)

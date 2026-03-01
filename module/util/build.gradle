@@ -2,13 +2,9 @@ plugins {
     id 'java-library'
 }
 
-//dependencyManagement {
-//    imports {
-//        mavenBom "org.springframework.boot:spring-boot-dependencies:4.0.1"
-//    }
-//}
 
 dependencies {
+
 
     // StringUtils 등 Util
     implementation 'org.apache.commons:commons-lang3:3.18.0'
@@ -25,6 +21,13 @@ dependencies {
     // Network
     implementation 'org.springframework:spring-web:7.0.2'
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+
+
+
+    // JWT
+    api 'io.jsonwebtoken:jjwt-api:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
 
 }

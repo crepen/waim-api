@@ -1,5 +1,8 @@
 dependencies {
-    implementation project(':module:waim-core')
+    implementation project(':module:core')
+    implementation project(':module:data')
+    implementation project(':module:util')
+    implementation project(':module:config')
 
     // Spring Boot Starters (버전 선언 제거)
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -12,6 +15,7 @@ dependencies {
 //    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 //    implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // API Documentation
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0'

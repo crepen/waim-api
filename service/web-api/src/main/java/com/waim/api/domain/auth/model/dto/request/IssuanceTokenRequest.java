@@ -3,10 +3,10 @@ package com.waim.api.domain.auth.model.dto.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.waim.api.domain.auth.model.dto.WAIMAuthGrantType;
-import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
+import com.waim.module.core.domain.auth.model.data.AuthGrantType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.aspectj.apache.bcel.classfile.Unknown;
 
 
 public class IssuanceTokenRequest {
@@ -15,7 +15,8 @@ public class IssuanceTokenRequest {
             use = JsonTypeInfo.Id.NAME,
             include = JsonTypeInfo.As.EXISTING_PROPERTY,
             property = "grant_type",
-            visible = true
+            visible = true,
+            defaultImpl = Base.class
     )
     @JsonSubTypes({
             @JsonSubTypes.Type(value = Login.class, name = "login"),
@@ -32,10 +33,10 @@ public class IssuanceTokenRequest {
     )
     @Getter
     @Setter
-    public static abstract class Base {
+    public static class Base {
         @Schema(description = "토큰 요청 타입")
         @JsonProperty("grant_type")
-        private WAIMAuthGrantType grantType;
+        private String grantType;
     }
 
     @Schema(description = "로그인 방식 요청")

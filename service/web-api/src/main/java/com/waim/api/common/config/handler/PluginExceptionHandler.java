@@ -2,7 +2,6 @@ package com.waim.api.common.config.handler;
 
 
 import com.waim.api.common.model.response.BaseResponse;
-import com.waim.core.plugin.gitlab.model.error.GitLabPluginException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,40 +24,40 @@ public class PluginExceptionHandler {
 
     private final MessageSource messageSource;
 
-    @ExceptionHandler(GitLabPluginException.class)
-    public ResponseEntity<?> handleGitlabPluginException(
-            final GitLabPluginException e,
-            HttpServletRequest request
-    ) {
-        Locale locale = LocaleContextHolder.getLocale();
-
-        var castLocaleArgs =
-                e.getMessageArgs() == null
-                        ? new String[]{}
-                        : Arrays.stream(e.getMessageArgs()).map(x ->
-                        messageSource.getMessage(
-                                x,
-                                null,
-                                x,
-                                locale
-                        )
-                ).toArray(String[]::new);
-
-
-        return ResponseEntity
-                .status(e.getStatusCode())
-                .body(
-                        BaseResponse.Error.builder()
-                                .message(
-                                        messageSource.getMessage(
-                                                e.getMessage(),
-                                                castLocaleArgs,
-                                                e.getMessage(),
-                                                locale
-                                        )
-                                )
-                                .build()
-                );
-    }
+//    @ExceptionHandler(GitLabPluginException.class)
+//    public ResponseEntity<?> handleGitlabPluginException(
+//            final GitLabPluginException e,
+//            HttpServletRequest request
+//    ) {
+//        Locale locale = LocaleContextHolder.getLocale();
+//
+//        var castLocaleArgs =
+//                e.getMessageArgs() == null
+//                        ? new String[]{}
+//                        : Arrays.stream(e.getMessageArgs()).map(x ->
+//                        messageSource.getMessage(
+//                                x,
+//                                null,
+//                                x,
+//                                locale
+//                        )
+//                ).toArray(String[]::new);
+//
+//
+//        return ResponseEntity
+//                .status(e.getStatusCode())
+//                .body(
+//                        BaseResponse.Error.builder()
+//                                .message(
+//                                        messageSource.getMessage(
+//                                                e.getMessage(),
+//                                                castLocaleArgs,
+//                                                e.getMessage(),
+//                                                locale
+//                                        )
+//                                )
+//                                .build()
+//                );
+//    }
 
 }

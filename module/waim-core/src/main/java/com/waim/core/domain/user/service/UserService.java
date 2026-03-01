@@ -157,8 +157,8 @@ public class UserService {
      * @param emailEnc 사용자 Email (Hash 암호화값)
      * @return 중복된 사용자 Entity List
      */
-    public List<UserEntity> getDuplicateUserList( String name , String id , String emailEnc){
-        return userRepository.findAll(UserSpecification.duplicateMatchUser(name , id , emailEnc));
+    public List<UserEntity> getDuplicateUserList( String name , String id , String emailEnc) {
+        return userRepository.findAll(UserSpecification.duplicateMatchUser(name, id, emailEnc));
     }
 
 

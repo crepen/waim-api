@@ -17,11 +17,15 @@ rootProject.name = 'waim'
 
 
 
-include ':module:waim-core'
-include ':module:storage', ':module:util'
-include ':module:config' , ':module:domain:task'
+
+include ':module:core'
+include ':module:data'
+include ':module:util'
+include ':module:config'
+
+
 include ':service:web-api', ':service:waim-scheduler', ':service:task-master', ':service:task-worker'
 
 
-
-project(':module:config').projectDir = file('module/module-config')
+include ':deprecate_waim-core'
+project(':deprecate_waim-core').projectDir = file('module/waim-core')

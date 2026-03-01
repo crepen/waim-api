@@ -1,9 +1,9 @@
 package com.waim.taskmaster.scheduler;
 
-import com.waim.module.domain.task.service.TaskService;
-import com.waim.module.storage.domain.task.entity.TaskAttributeEntity;
-import com.waim.module.storage.domain.task.entity.TaskEntity;
-import com.waim.module.storage.domain.task.repository.TaskRepository;
+import com.waim.module.core.domain.task.model.entity.TaskAttributeEntity;
+import com.waim.module.core.domain.task.model.entity.TaskEntity;
+import com.waim.module.core.domain.task.repository.TaskRepository;
+import com.waim.module.core.domain.task.service.TaskService;
 import com.waim.taskmaster.config.RabbitConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class TaskDispatcher {
     public void dispatchTask(){
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
-        List<TaskEntity> taskEntities = taskService.getActiveTask();
+        List<TaskEntity> taskEntities = taskService.getLoopActiveTask();
 
         for(TaskEntity taskEntity : taskEntities){
             try{

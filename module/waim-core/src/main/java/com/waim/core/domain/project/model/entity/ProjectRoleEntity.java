@@ -51,6 +51,8 @@ public class ProjectRoleEntity extends CommonTimestampEntity {
     )
     private ProjectRole role;
 
+
+
     @PrePersist
     protected void onCreate() {
 

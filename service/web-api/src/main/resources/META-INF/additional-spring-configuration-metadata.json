@@ -1,19 +1,19 @@
 {
   "properties": [
     {
-      "name": "waim.auth.jwt.secret",
+      "name": "waim.jwt.secret",
       "type": "java.lang.String",
       "description": "WAIM 인증 JWT Secret Key."
     },
     {
-      "name": "waim.auth.jwt.expiration",
-      "type": "java.lang.Long",
-      "description": "WAIM 인증 JWT Access Token 유지시간 (ms)."
+      "name": "waim.jwt.expire_access",
+      "type": "java.lang.String",
+      "description": "WAIM 인증 JWT Access Token 유지시간 (ex. 5분 : 5m)"
     },
     {
-      "name": "waim.auth.jwt.refresh-expiration",
-      "type": "java.lang.Long",
-      "description": "WAIM 인증 JWT Refresh Token 유지시간 (ms)."
+      "name": "waim.jwt.expire_refresh",
+      "type": "java.lang.String",
+      "description": "WAIM 인증 JWT Refresh Token 유지시간 (ex. 5분 : 5m)."
     },
     {
       "name": "waim.crypto.salt",

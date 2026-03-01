@@ -9,9 +9,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.TimeZone;
 
-@SpringBootApplication(scanBasePackages = {"com.waim"})
-@EnableJpaRepositories(basePackages = "com.waim.core")
-@EntityScan(basePackages = "com.waim.core")
+@SpringBootApplication(
+        scanBasePackages = "com.waim.api"
+)
 @EnableAsync
 public class WaimApiApplication {
 

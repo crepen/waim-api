@@ -1,8 +1,8 @@
 package com.waim.api.common.config.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.waim.api.domain.auth.model.error.AuthErrorCode;
 import com.waim.api.common.model.response.BaseResponse;
+import com.waim.module.core.domain.auth.model.error.AuthForbiddenException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,15 +23,22 @@ public class SecurityAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        var baseErrorCode = AuthErrorCode.ACCESS_DENIED_WA_A0002;
+        var baseErrorCode = new AuthForbiddenException();
 
-        response.setStatus(baseErrorCode.getHttpStatus().value());
+        response.setStatus(baseErrorCode.getStatusCode());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
         var responseObj = BaseResponse.Error.builder()
-                .code(baseErrorCode.getCode())
-                .message(messageSource.getMessage(baseErrorCode.getMessage(), null, "Forbidden" ,request.getLocale()))
+                .code(baseErrorCode.getErrorCode())
+                .message(
+                        messageSource.getMessage(
+                                baseErrorCode.getMessage(),
+                                null,
+                                baseErrorCode.getMessage(),
+                                request.getLocale()
+                        )
+                )
                 .build();
 
         response.getWriter().write(objectMapper.writeValueAsString(responseObj));

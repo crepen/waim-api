@@ -1,0 +1,27 @@
+plugins {
+    id 'java-library'
+}
+
+
+dependencies {
+
+
+    implementation 'org.springframework.data:spring-data-commons'
+
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
+
+    // Lombok (Core 모듈 내부용)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+
+
+}
+
+
+
+
+bootJar { enabled = false } // 실행 파일 생성 방지
+jar { enabled = true }      // 라이브러리 jar 생성
+
+

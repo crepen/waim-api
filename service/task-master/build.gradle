@@ -1,5 +1,5 @@
 dependencies {
-    implementation project(':module:domain:task')
+    implementation project(':module:core')
     implementation project(':module:config')
 
     // Valkey(Redis 호환) 조회
