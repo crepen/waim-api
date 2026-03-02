@@ -1,21 +1,22 @@
-package com.waim.module.core.domain.task.model.entity;
+package com.waim.module.core.domain.user.model.entity;
 
+import com.waim.module.core.common.converter.EntityBooleanToYNConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(
-        name = "aod_task_attr",
+        name = "aod_user_attr",
+        indexes = @Index(name = "idx_user_attr_user_uid", columnList = "user_uid"),
         options = "DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci",
-        comment = "프로젝트 Task 속성 Table"
-        
+        comment = "사용자 속성 Table"
 )
-public class TaskAttributeEntity {
+public class UserAttributeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(
@@ -25,23 +26,25 @@ public class TaskAttributeEntity {
     )
     private Long idx;
 
-    @Column(
-            name = "task_uid",
-            nullable = false ,
-            comment = "Task UID"
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "user_uid",
+            nullable = false,
+            comment = "사용자 UID"
     )
-    private String taskUid;
+    private UserEntity user;
 
     @Column(
             name = "attr_key",
             nullable = false,
-            comment = "Task 속성 키"
+            comment = "속성 키"
     )
     private String attrKey;
 
     @Column(
             name = "attr_value",
-            comment = "Task 속성 값"
+            comment = "속성 값"
     )
     private String attrValue;
+
 }

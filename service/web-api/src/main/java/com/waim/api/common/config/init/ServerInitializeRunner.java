@@ -16,20 +16,23 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 @Order(102)
-public class AdminUserInitializer implements ApplicationRunner {
+public class ServerInitializeRunner implements ApplicationRunner {
     private final SystemConfigService systemConfigService;
     private final UserService userService;
 
     @Override
     @Transactional
     @NullMarked
-    public void run( ApplicationArguments args) {
+    public void run(ApplicationArguments args) {
 
         Optional<SystemConfigEntity> initConfig = systemConfigService.getConfig(SystemConfigKey.INIT_SYSTEM.name());
 
@@ -37,7 +40,7 @@ public class AdminUserInitializer implements ApplicationRunner {
             // SYSTEM INIT
 
             try {
-                // Add Admin account
+                // region Add Admin account
 
                 userService.addUser(
                         AddUserProp.builder()
@@ -51,8 +54,38 @@ public class AdminUserInitializer implements ApplicationRunner {
                 );
 
                 log.info("Add Admin Account.");
+
+                // endregion
+
+
+                // region Update protected User attribute keys
+
+                List<String> userProtectAttrList = List.of(
+                        "TEST"
+                );
+
+                systemConfigService.setConfig(
+                        SystemConfigKey.USER_PROTECT_ATTR_KEY.name(),
+                        String.join(",", userProtectAttrList)
+                );
+
+                log.info("Update user protect attribute keys");
+
+                // endregion
+
+
+                // region Complete initialization
+
+                if (initConfig.isEmpty()) {
+                    systemConfigService.setConfig(SystemConfigKey.INIT_SYSTEM.name(), "T");
+                } else {
+                    systemConfigService.setConfig(initConfig.get(), "T");
+                }
+
+                // endregion
+
             } catch (Exception ex) {
-                log.error("Add Admin Account failed.");
+                log.error("Server initialization failed.");
                 throw ex;
             }
 

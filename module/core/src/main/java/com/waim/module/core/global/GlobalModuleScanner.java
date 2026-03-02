@@ -1,6 +1,7 @@
 package com.waim.module.core.global;
 
 import com.waim.module.core.domain.auth.AuthModuleScanner;
+import com.waim.module.core.domain.group.GroupModuleScanner;
 import com.waim.module.core.domain.project.ProjectModuleScanner;
 import com.waim.module.core.domain.task.TaskModuleScanner;
 import com.waim.module.core.domain.user.UserModuleScanner;
@@ -14,7 +15,8 @@ import org.springframework.context.annotation.Import;
         UserModuleScanner.class,
         TaskModuleScanner.class,
         ProjectModuleScanner.class,
-        SystemConfigModuleScanner.class
+        SystemConfigModuleScanner.class,
+        GroupModuleScanner.class
 })
 public class GlobalModuleScanner {
 }

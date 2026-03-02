@@ -3,12 +3,10 @@ package com.waim.api.domain.user.controller;
 import com.waim.api.common.model.response.BaseResponse;
 import com.waim.api.domain.user.model.request.AddUserRequest;
 import com.waim.api.domain.user.model.request.RemoveUserRequest;
+import com.waim.api.domain.user.model.request.UpdateUserRequest;
 import com.waim.module.core.domain.user.service.UserService;
 import com.waim.module.data.common.security.SecurityUserDetail;
-import com.waim.module.data.domain.user.AddUserProp;
-import com.waim.module.data.domain.user.RemoveUserProp;
-import com.waim.module.data.domain.user.UserRole;
-import com.waim.module.data.domain.user.UserStatus;
+import com.waim.module.data.domain.user.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +50,31 @@ public class UserController {
                         BaseResponse.Success.builder()
                                 .build()
                 );
+    }
+
+    @PostMapping
+    @Operation(summary = "사용자 정보 수정")
+    public ResponseEntity<?> updateUser(
+            @AuthenticationPrincipal SecurityUserDetail userDetail,
+            @RequestBody UpdateUserRequest reqBody
+    ) {
+
+        userService.updateUser(
+                UpdateUserProp.builder()
+                        .userUid(userDetail.getUniqueId())
+                        .name(reqBody.getName())
+                        .email(reqBody.getEmail())
+                        .password(reqBody.getPassword())
+                        .role(reqBody.getRole())
+                        .status(reqBody.getStatus())
+                        .config(reqBody.getConfig())
+                        .build()
+        );
+
+        return ResponseEntity.ok().body(
+                BaseResponse.Success.builder()
+                        .build()
+        );
     }
 
 

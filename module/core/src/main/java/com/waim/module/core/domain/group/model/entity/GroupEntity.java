@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(
-        name = "aob_group",
+        name = "aod_group",
         options = "DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci",
         comment = "그룹 Table"
 )
@@ -34,7 +34,7 @@ public class GroupEntity {
     @Column(
             name = "group_alias",
             nullable = false , length = 50,
-            comment = "그룹 약자 (영소문자 , 숫자 , '_' 허용)"
+            comment = "그룹 약자 (영소문자 , 숫자 , _ 허용)"
     )
     private String groupAlias;
 

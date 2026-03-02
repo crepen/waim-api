@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(
-        name = "aob_project",
+        name = "aod_project",
         options = "DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci",
         comment = "프로젝트 Table"
 )
@@ -34,14 +34,14 @@ public class ProjectEntity extends GlobalTimeEntity {
 
     @Column(
             name = "project_alias",
-            unique = true, nullable = false,
+            nullable = false,
             comment = "프로젝트 약자 (영문(소문자) , 숫자만 허용)"
     )
     private String projectAlias;
 
     @Column(
             name = "project_name",
-            unique = true, nullable = false,
+            nullable = false,
             comment = "프로젝트명"
     )
     private String projectName;
@@ -66,7 +66,6 @@ public class ProjectEntity extends GlobalTimeEntity {
     private UserEntity projectOwner;
 
 
-
     @Builder.Default
     @OneToMany(
             fetch = FetchType.LAZY,
@@ -84,7 +83,6 @@ public class ProjectEntity extends GlobalTimeEntity {
         this.projectRoles.add(role);
         role.setProject(this);
     }
-
 
 
     @PrePersist

@@ -2,6 +2,8 @@ package com.waim.api.common.config.handler;
 
 import com.waim.api.common.model.response.BaseResponse;
 import com.waim.module.core.common.model.error.ServerException;
+import com.waim.module.core.common.model.error.UncategorizedException;
+import com.waim.module.core.common.model.error.UnsupportedMediaTypeException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -26,7 +29,15 @@ public class GlobalExceptionHandler {
     private final MessageSource messageSource;
 
 
-
+    // Media Type Not Supported
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<?> httpMediaTypeNotSupportedException(
+            final HttpMediaTypeNotSupportedException e
+    ) {
+        var baseException = new UnsupportedMediaTypeException();
+        Locale locale = LocaleContextHolder.getLocale();
+        return getResponse(locale , baseException);
+    }
 
 
 
@@ -38,42 +49,33 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         log.error(ex.getMessage());
+        var baseException = new UncategorizedException();
         Locale locale = LocaleContextHolder.getLocale();
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(
-                        BaseResponse.Error.builder()
-                                .code("WRE_0001")
-                                .message(
-                                        messageSource.getMessage(
-                                                "runtime.error.message_not_readable",
-                                                null,
-                                                "Data body is required.",
-                                                locale
-                                        )
-                                )
-                                .build()
-                );
+        return getResponse(locale , baseException);
     }
 
 
+    // Other Exception
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleAllExceptions(Exception ex) {
-
         log.error("UNCATEGORIZED EXCEPTION", ex);
+        var baseException = new UncategorizedException();
         Locale locale = LocaleContextHolder.getLocale();
+        return getResponse(locale , baseException);
+    }
 
+
+    private ResponseEntity<?> getResponse(Locale locale , ServerException baseException){
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(baseException.getStatusCode())
                 .body(
                         BaseResponse.Error.builder()
-                                .code("WRE_0002")
+                                .code(baseException.getErrorCode())
                                 .message(
                                         messageSource.getMessage(
-                                                "runtime.error.wre_0002.uncategorized_exception",
+                                                baseException.getLocaleMessageCode(),
                                                 null,
-                                                "Unknown error occurred.",
+                                                baseException.getMessage(),
                                                 locale
                                         )
                                 )

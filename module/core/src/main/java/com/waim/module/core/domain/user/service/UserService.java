@@ -1,13 +1,11 @@
 package com.waim.module.core.domain.user.service;
 
 import com.waim.module.core.domain.auth.model.error.AuthForbiddenException;
+import com.waim.module.core.domain.user.model.entity.UserAttributeEntity;
 import com.waim.module.core.domain.user.model.entity.UserEntity;
 import com.waim.module.core.domain.user.model.error.*;
 import com.waim.module.core.domain.user.repository.UserRepository;
-import com.waim.module.data.domain.user.AddUserProp;
-import com.waim.module.data.domain.user.FindUserProp;
-import com.waim.module.data.domain.user.RemoveUserProp;
-import com.waim.module.data.domain.user.UserStatus;
+import com.waim.module.data.domain.user.*;
 import com.waim.module.util.crypto.CryptoProvider;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final CryptoProvider cryptoProvider;
     private final PasswordEncoder passwordEncoder;
+    private final UserAttributeService userAttributeService;
 
 
     // region Runtime method
@@ -172,6 +171,99 @@ public class UserService {
         userRepository.save(addUserEntity);
     }
 
+
+    @Transactional
+    public void updateUser(UpdateUserProp updateProp){
+        if(!StringUtils.hasText(updateProp.getUserUid())){
+            throw new UserEmptyUidException();
+        }
+
+        Optional<UserEntity> matchUser = userRepository.findByUid(updateProp.getUserUid());
+
+        if(matchUser.isEmpty()){
+            throw new UserNotFoundException();
+        }
+
+        UserEntity userEntity = matchUser.get();
+
+        // Update Password
+        if(StringUtils.hasText(updateProp.getPassword())){
+            userEntity.setUserPassword(passwordEncoder.encode(updateProp.getPassword()));
+        }
+
+        // Update email
+        if(StringUtils.hasText(updateProp.getEmail())){
+            userEntity.setUserEmail(updateProp.getEmail());
+            userEntity.setUserEmailHash(cryptoProvider.staticHash(updateProp.getEmail()));
+        }
+
+        // Update name
+        if(StringUtils.hasText(updateProp.getName())){
+            userEntity.setUserName(updateProp.getName());
+        }
+
+        // Update role
+        if(StringUtils.hasText(updateProp.getRole())){
+
+            UserRole userRole;
+
+            try{
+                userRole = Enum.valueOf(UserRole.class, updateProp.getRole().toUpperCase());
+            }
+            catch (Exception ex) {
+                throw new UserUnsupportedRoleException();
+            }
+
+
+            userEntity.setUserRole(userRole);
+        }
+
+        // Update status
+        if(StringUtils.hasText(updateProp.getStatus())){
+            UserStatus userStatus;
+
+            try{
+                userStatus = Enum.valueOf(UserStatus.class, updateProp.getStatus().toUpperCase());
+            }
+            catch (Exception ex) {
+                throw new UserUnsupportedStatusException();
+            }
+
+
+            userEntity.setUserStatus(userStatus);
+        }
+
+        // Update user config
+        if(updateProp.getConfig() != null && !updateProp.getConfig().isEmpty()){
+
+            List<String> matchProjectList = userAttributeService.getProtectedKeys().stream().filter(
+                    x-> !updateProp.getConfig().keySet().stream().filter(
+                            y -> y.toUpperCase().equals(x)
+                    ).toList().isEmpty()
+            ).toList();
+
+            if(!matchProjectList.isEmpty()){
+                throw new UserProtectedAttributeException(matchProjectList.getFirst().toUpperCase());
+            }
+
+            List<UserAttributeEntity> userAttrList = userAttributeService.getConfigs(updateProp.getConfig().keySet().stream().map(String::toUpperCase).toList());
+
+            for(String key : updateProp.getConfig().keySet()){
+                UserAttributeEntity matchAttr = userAttrList.stream().filter(x->x.getAttrKey().equals(key.toUpperCase()))
+                        .findFirst().orElse(
+                                UserAttributeEntity.builder()
+                                        .attrKey(key.toUpperCase())
+                                        .build()
+                        );
+
+                matchAttr.setAttrValue(updateProp.getConfig().get(key));
+
+                userEntity.addAttribute(matchAttr);
+            }
+        }
+
+        userRepository.save(userEntity);
+    }
 
     @Transactional
     public void removeUser(RemoveUserProp removeProp){

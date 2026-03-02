@@ -15,7 +15,7 @@ import lombok.*;
 @AllArgsConstructor
 @IdClass(ProjectRoleId.class)
 @Table(
-        name = "aob_project_role",
+        name = "aod_project_role",
         options = "DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci",
         comment = "프로젝트 - 사용자 권한 관리 Table"
 )

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class SystemConfigService {
     private final SystemConfigRepository systemConfigRepository;
 
+    @Transactional
     public Optional<SystemConfigEntity> getConfig(String configKey) {
         Specification<SystemConfigEntity> spec = (
                 (root, query, cb) -> {
@@ -31,6 +33,7 @@ public class SystemConfigService {
         return systemConfigRepository.findOne(spec);
     }
 
+    @Transactional
     public List<SystemConfigEntity> getConfigs(List<String> configKeys) {
         Specification<SystemConfigEntity> spec = (
                 (root, query, cb) -> {
@@ -43,10 +46,12 @@ public class SystemConfigService {
         return systemConfigRepository.findAll(spec);
     }
 
+    @Transactional
     public List<SystemConfigEntity> getConfigs(String... configKeys) {
         return getConfigs(Arrays.stream(configKeys).toList());
     }
 
+    @Transactional
     public void setConfig(String configKey, String configValue) {
 
         if (!StringUtils.hasText(configKey)) {
@@ -65,8 +70,16 @@ public class SystemConfigService {
                         .build()
         );
 
-        saveEntity.setConfigValue(configValue);
+        setConfig(saveEntity , configValue);
+    }
 
-        systemConfigRepository.save(saveEntity);
+    @Transactional
+    public void setConfig(SystemConfigEntity entity , String configValue){
+        if (!StringUtils.hasText(configValue)) {
+            throw new SystemConfigEmptyKeyException();
+        }
+
+        entity.setConfigValue(configValue);
+        systemConfigRepository.save(entity);
     }
 }

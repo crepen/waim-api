@@ -14,11 +14,10 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(
-        name = "system_config",
+        name = "aos_system_config",
         options = "DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci",
         comment = "시스템 설정 Table"
 )
-@EntityListeners(UserDataListener.class)
 public class SystemConfigEntity extends GlobalTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

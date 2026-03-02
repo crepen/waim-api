@@ -59,7 +59,7 @@ public class ProjectEntity extends CommonTimestampEntity {
     )
     private ProjectStatus projectStatus = ProjectStatus.ACTIVE;
 
-    @ManyToOne(fetch = FetchType.LAZY) // 성능을 위해 지연 로딩 권장
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "project_owner_uid", referencedColumnName = "uid", nullable = false,
             comment = "프로젝트 소유자 UID"

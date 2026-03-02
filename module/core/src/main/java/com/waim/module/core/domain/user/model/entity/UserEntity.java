@@ -9,6 +9,9 @@ import com.waim.module.data.domain.user.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -16,7 +19,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(
-        name = "aob_user",
+        name = "aod_user",
         options = "DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci",
         comment = "사용자 Table"
 )
@@ -88,9 +91,22 @@ public class UserEntity  extends GlobalTimeEntity {
     )
     private UserRole userRole = UserRole.GENERAL;
 
+    @Builder.Default
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            targetEntity = UserAttributeEntity.class
+    )
+    private List<UserAttributeEntity> aodUserAttr = new ArrayList<>();
 
 
 
+    public void addAttribute(UserAttributeEntity attribute) {
+        this.aodUserAttr.add(attribute);
+        attribute.setUser(this);
+    }
 
 
     @PrePersist
