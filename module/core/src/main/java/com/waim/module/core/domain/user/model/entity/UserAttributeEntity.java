@@ -1,6 +1,7 @@
 package com.waim.module.core.domain.user.model.entity;
 
-import com.waim.module.core.common.converter.EntityBooleanToYNConverter;
+import com.waim.module.core.common.converter.EntityStringCryptoConverter;
+import com.waim.module.core.domain.user.listener.UserAttributeDataListener;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,6 +17,7 @@ import lombok.*;
         options = "DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci",
         comment = "사용자 속성 Table"
 )
+@EntityListeners(UserAttributeDataListener.class)
 public class UserAttributeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,6 +47,7 @@ public class UserAttributeEntity {
             name = "attr_value",
             comment = "속성 값"
     )
+    @Convert(converter = EntityStringCryptoConverter.class)
     private String attrValue;
 
 }

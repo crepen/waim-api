@@ -1,5 +1,7 @@
-package com.waim.module.data.domain.user;
+package com.waim.module.data.domain.user.prop;
 
+import com.waim.module.data.domain.user.UserRole;
+import com.waim.module.data.domain.user.UserStatus;
 import lombok.*;
 
 @Getter

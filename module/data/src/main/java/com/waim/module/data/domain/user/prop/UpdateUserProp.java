@@ -1,4 +1,4 @@
-package com.waim.module.data.domain.user;
+package com.waim.module.data.domain.user.prop;
 
 import lombok.Builder;
 import lombok.Getter;

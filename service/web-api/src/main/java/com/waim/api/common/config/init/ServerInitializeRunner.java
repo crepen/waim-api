@@ -3,7 +3,7 @@ package com.waim.api.common.config.init;
 import com.waim.module.core.domain.user.service.UserService;
 import com.waim.module.core.system.config.model.entity.SystemConfigEntity;
 import com.waim.module.core.system.config.service.SystemConfigService;
-import com.waim.module.data.domain.user.AddUserProp;
+import com.waim.module.data.domain.user.prop.AddUserProp;
 import com.waim.module.data.domain.user.UserRole;
 import com.waim.module.data.domain.user.UserStatus;
 import com.waim.module.data.system.config.SystemConfigKey;
@@ -16,10 +16,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -64,10 +62,15 @@ public class ServerInitializeRunner implements ApplicationRunner {
                         "TEST"
                 );
 
-                systemConfigService.setConfig(
-                        SystemConfigKey.USER_PROTECT_ATTR_KEY.name(),
-                        String.join(",", userProtectAttrList)
-                );
+
+                //noinspection ConstantValue
+                if(!userProtectAttrList.isEmpty()){
+                    systemConfigService.setConfig(
+                            SystemConfigKey.USER_PROTECT_ATTR_KEY.name(),
+                            String.join(",", userProtectAttrList)
+                    );
+                }
+
 
                 log.info("Update user protect attribute keys");
 
