@@ -2,6 +2,7 @@ package com.waim.api.domain.auth.controller;
 
 import com.waim.api.common.model.response.BaseResponse;
 import com.waim.api.domain.auth.model.dto.request.IssuanceTokenRequest;
+import com.waim.api.domain.auth.model.dto.response.GetTokenUserDataResponse;
 import com.waim.api.domain.auth.model.dto.response.JwtResponse;
 import com.waim.module.core.domain.auth.model.data.AuthGrantType;
 import com.waim.module.core.domain.auth.model.error.AuthInvalidGrantTypeException;
@@ -40,7 +41,19 @@ public class AuthController {
     ) {
 
         return ResponseEntity.ok()
-                .body(userDetail);
+                .body(
+                        BaseResponse.Success.builder()
+                                .result(
+                                        GetTokenUserDataResponse.builder()
+                                                .uniqueId(userDetail.getUniqueId())
+                                                .id(userDetail.getId())
+                                                .name(userDetail.getUserName())
+                                                .email(userDetail.getEmail())
+                                                .roles(userDetail.getRoles())
+                                                .build()
+                                )
+                                .build()
+                );
     }
 
     @PutMapping
