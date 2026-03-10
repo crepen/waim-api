@@ -4,6 +4,8 @@ import lombok.*;
 import org.springframework.web.bind.annotation.BindParam;
 
 public record SearchProjectRequest (
+        @BindParam("group_uid")
+        String groupUid,
         @BindParam("keyword")
         String searchKeyword
 ){}

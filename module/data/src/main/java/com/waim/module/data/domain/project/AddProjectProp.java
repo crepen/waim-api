@@ -11,4 +11,6 @@ public class AddProjectProp {
     private String projectName;
     private String projectAlias;
     private String projectOwnerUserUid;
+    private String actionUserUid;
+    private String groupUid;
 }

@@ -4,6 +4,7 @@ import com.waim.api.common.model.CommonPageable;
 import com.waim.api.common.model.response.BasePageableResponse;
 import com.waim.api.common.model.response.BaseResponse;
 import com.waim.api.domain.project.model.request.AddProjectRequest;
+import com.waim.api.domain.project.model.request.ProjectPermissionRequest;
 import com.waim.api.domain.project.model.request.SearchProjectRequest;
 import com.waim.module.core.domain.project.model.entity.ProjectEntity;
 import com.waim.module.core.domain.project.model.error.ProjectNotFoundException;
@@ -11,6 +12,8 @@ import com.waim.module.core.domain.project.service.ProjectService;
 import com.waim.module.data.common.security.SecurityUserDetail;
 import com.waim.module.data.domain.project.AddProjectProp;
 import com.waim.module.data.domain.project.ProjectData;
+import com.waim.module.data.domain.project.ProjectPermissionMetaData;
+import com.waim.module.data.domain.project.ProjectPermissionData;
 import com.waim.module.data.domain.project.RemoveProjectProp;
 import com.waim.module.data.domain.project.SearchProjectProp;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,6 +49,7 @@ public class ProjectController {
 
         Page<ProjectEntity> projectDataList = projectService.searchProject(
                 SearchProjectProp.builder()
+                        .groupUid(reqParam.groupUid())
                         .keyword(reqParam.searchKeyword())
                         .searchUserUid(userDetail.getUniqueId())
                         .pageable(pageable)
@@ -59,6 +63,7 @@ public class ProjectController {
                         .projectAlias(x.getProjectAlias())
                         .projectOwnerName(x.getProjectOwner().getUserName())
                         .projectOwnerUid(x.getProjectOwner().getUid())
+                        .groupUid(x.getProjectGroup() == null ? null : x.getProjectGroup().getUid())
                         .createTimestamp(
                                 x.getCreateAt()
                                         .toInstant().toEpochMilli()
@@ -94,7 +99,9 @@ public class ProjectController {
                 AddProjectProp.builder()
                         .projectName(reqBody.getProjectName())
                         .projectAlias(reqBody.getProjectAlias())
+                        .groupUid(reqBody.getGroupUid())
                         .projectOwnerUserUid(userDetail.getUniqueId())
+                        .actionUserUid(userDetail.getUniqueId())
                         .build()
         );
 
@@ -124,6 +131,7 @@ public class ProjectController {
                 .projectAlias(findProject.get().getProjectAlias())
                 .projectOwnerName(findProject.get().getProjectOwner().getUserName())
                 .projectOwnerUid(findProject.get().getProjectOwner().getUid())
+                .groupUid(findProject.get().getProjectGroup() == null ? null : findProject.get().getProjectGroup().getUid())
                 .createTimestamp(
                         findProject.get().getCreateAt()
                                 .toInstant().toEpochMilli()
@@ -166,5 +174,108 @@ public class ProjectController {
                         BaseResponse.Success.builder()
                                 .build()
                 );
+    }
+
+    @GetMapping("{projectUid}/permission")
+    @Operation(summary = "프로젝트 사용자 권한 조회")
+    public ResponseEntity<?> getProjectPermissions(
+            @AuthenticationPrincipal SecurityUserDetail userDetail,
+            @PathVariable String projectUid
+    ) {
+        List<ProjectPermissionData> result = projectService.getProjectPermissions(projectUid);
+
+        return ResponseEntity.ok(
+                BaseResponse.Success.builder()
+                        .result(result)
+                        .build()
+        );
+    }
+
+    @PutMapping("{projectUid}/permission")
+    @Operation(summary = "프로젝트 사용자 권한 추가")
+    public ResponseEntity<?> addProjectPermission(
+            @AuthenticationPrincipal SecurityUserDetail userDetail,
+            @PathVariable String projectUid,
+            @RequestBody ProjectPermissionRequest reqBody
+    ) {
+                String targetUser = reqBody.getUserId();
+        if (targetUser == null || targetUser.isBlank()) {
+                        targetUser = reqBody.getUserEmail();
+        }
+
+        projectService.addProjectPermission(
+                projectUid,
+                targetUser,
+                reqBody.getRole(),
+                userDetail.getUniqueId(),
+                isAdmin(userDetail)
+        );
+
+        return ResponseEntity.ok(
+                BaseResponse.Success.builder()
+                        .build()
+        );
+    }
+
+    @PostMapping("{projectUid}/permission/{permissionUid}")
+    @Operation(summary = "프로젝트 사용자 권한 수정")
+    public ResponseEntity<?> updateProjectPermission(
+            @AuthenticationPrincipal SecurityUserDetail userDetail,
+            @PathVariable String projectUid,
+            @PathVariable String permissionUid,
+            @RequestBody ProjectPermissionRequest reqBody
+    ) {
+        projectService.upsertProjectPermission(
+                projectUid,
+                permissionUid,
+                reqBody.getRole(),
+                userDetail.getUniqueId(),
+                isAdmin(userDetail)
+        );
+
+        return ResponseEntity.ok(
+                BaseResponse.Success.builder()
+                        .build()
+        );
+    }
+
+    @DeleteMapping("{projectUid}/permission/{permissionUid}")
+    @Operation(summary = "프로젝트 사용자 권한 삭제")
+    public ResponseEntity<?> removeProjectPermission(
+            @AuthenticationPrincipal SecurityUserDetail userDetail,
+            @PathVariable String projectUid,
+            @PathVariable String permissionUid
+    ) {
+        projectService.removeProjectPermission(
+                projectUid,
+                permissionUid,
+                userDetail.getUniqueId(),
+                isAdmin(userDetail)
+        );
+
+        return ResponseEntity.ok(
+                BaseResponse.Success.builder()
+                        .build()
+        );
+    }
+
+    @GetMapping("permission/meta")
+    @Operation(summary = "프로젝트 권한 메타 정보 조회")
+    public ResponseEntity<?> getProjectPermissionMeta(
+            @AuthenticationPrincipal SecurityUserDetail userDetail
+    ) {
+        List<ProjectPermissionMetaData> result = projectService.getProjectPermissionMeta();
+
+        return ResponseEntity.ok(
+                BaseResponse.Success.builder()
+                        .result(result)
+                        .build()
+        );
+    }
+
+    private boolean isAdmin(SecurityUserDetail userDetail) {
+        return userDetail != null
+                && userDetail.getRoles() != null
+                && userDetail.getRoles().stream().anyMatch(role -> role != null && role.toLowerCase().contains("admin"));
     }
 }

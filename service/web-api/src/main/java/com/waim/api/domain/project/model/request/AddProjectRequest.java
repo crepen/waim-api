@@ -14,4 +14,7 @@ public class AddProjectRequest {
 
     @JsonProperty("project_alias")
     private String projectAlias;
+
+    @JsonProperty("group_uid")
+    private String groupUid;
 }

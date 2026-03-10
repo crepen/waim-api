@@ -28,4 +28,7 @@ public class ProjectData {
 
     @JsonProperty("project_owner_uid")
     String projectOwnerUid;
+
+    @JsonProperty("group_uid")
+    String groupUid;
 }

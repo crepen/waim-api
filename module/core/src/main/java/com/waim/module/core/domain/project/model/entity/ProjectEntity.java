@@ -1,6 +1,7 @@
 package com.waim.module.core.domain.project.model.entity;
 
 import com.waim.module.core.common.model.entity.GlobalTimeEntity;
+import com.waim.module.core.domain.group.model.entity.GroupEntity;
 import com.waim.module.core.domain.project.listener.ProjectDataListener;
 import com.waim.module.core.domain.user.model.entity.UserEntity;
 import com.waim.module.data.domain.project.ProjectStatus;
@@ -64,6 +65,14 @@ public class ProjectEntity extends GlobalTimeEntity {
             comment = "프로젝트 소유자 UID"
     )
     private UserEntity projectOwner;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "group_uid",
+            referencedColumnName = "uid",
+            comment = "연결 그룹 UID"
+    )
+    private GroupEntity projectGroup;
 
 
     @Builder.Default

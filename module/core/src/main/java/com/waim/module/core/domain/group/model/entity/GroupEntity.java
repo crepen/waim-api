@@ -1,7 +1,11 @@
 package com.waim.module.core.domain.group.model.entity;
 
+import com.waim.module.core.domain.project.model.entity.ProjectEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -41,8 +45,39 @@ public class GroupEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "parent_group_uid",
-            referencedColumnName = "uid", nullable = false,
+            referencedColumnName = "uid", nullable = true,
             comment = "상위 그룹 UID"
     )
     private GroupEntity parentGroupUid;
+
+    @Builder.Default
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            mappedBy = "parentGroupUid"
+    )
+    private List<GroupEntity> childGroups = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            mappedBy = "projectGroup"
+    )
+    private List<ProjectEntity> projects = new ArrayList<>();
+
+        @Builder.Default
+        @OneToMany(
+                        fetch = FetchType.LAZY,
+                        mappedBy = "group",
+                        cascade = CascadeType.ALL,
+                        orphanRemoval = true
+        )
+        private List<GroupRoleEntity> groupRoles = new ArrayList<>();
+
+        public void addGroupRole(GroupRoleEntity role) {
+                if (this.groupRoles == null) {
+                        this.groupRoles = new ArrayList<>();
+                }
+                this.groupRoles.add(role);
+                role.setGroup(this);
+        }
 }

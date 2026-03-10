@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<ProjectEntity, String> , JpaSpecificationExecutor<ProjectEntity> {
+	long countByProjectGroup_Uid(String groupUid);
 
 }

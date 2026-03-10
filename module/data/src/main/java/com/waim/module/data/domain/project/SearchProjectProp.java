@@ -14,8 +14,13 @@ import java.util.List;
 @Builder
 public class SearchProjectProp {
     private String keyword;
+    private String groupUid;
     private String searchUserUid;
     private Pageable pageable;
-    private boolean isAdmin;
-    private List<ProjectStatus> roles;
+
+    @Builder.Default
+    private boolean isAdmin = false;
+
+    @Builder.Default
+    private List<ProjectStatus> roles = new ArrayList<>();
 }
