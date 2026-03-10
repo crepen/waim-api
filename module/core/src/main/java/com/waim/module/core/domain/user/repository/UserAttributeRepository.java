@@ -5,9 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface UserAttributeRepository extends JpaRepository<UserAttributeEntity , Long>  , JpaSpecificationExecutor<UserAttributeEntity> {
-    Optional<UserAttributeEntity> findByAttrKey(String key);
+    List<UserAttributeEntity> findAllByUser_Uid(String userUid);
+
+    List<UserAttributeEntity> findAllByUser_UidAndAttrKeyIn(String userUid, List<String> attrKeys);
+
+    Optional<UserAttributeEntity> findByUser_UidAndAttrKey(String userUid, String key);
 }

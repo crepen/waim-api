@@ -13,6 +13,8 @@ import com.waim.module.util.crypto.CryptoProvider;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -61,6 +63,42 @@ public class UserService {
         return userRepository.findAll(spec);
     }
 
+    @Transactional
+    public Page<UserEntity> searchUsers(String keyword, String status, Pageable pageable) {
+        Specification<UserEntity> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            predicates.add(cb.notEqual(root.get("userStatus"), UserStatus.DELETE));
+
+            if (StringUtils.hasText(keyword)) {
+                String normalizedKeyword = keyword.trim();
+                String likeKeyword = "%" + normalizedKeyword + "%";
+                String emailHash = cryptoProvider.staticHash(normalizedKeyword);
+
+                predicates.add(
+                        cb.or(
+                                cb.like(root.get("userId"), likeKeyword),
+                                cb.equal(root.get("userEmailHash"), emailHash)
+                        )
+                );
+            }
+
+            if (StringUtils.hasText(status)) {
+                try {
+                    UserStatus matchStatus = UserStatus.valueOf(status.trim().toUpperCase());
+                    predicates.add(cb.equal(root.get("userStatus"), matchStatus));
+                }
+                catch (IllegalArgumentException ignored) {
+                    // Ignore invalid status filter value
+                }
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return userRepository.findAll(spec, pageable);
+    }
+
     // endregion
 
 
@@ -69,6 +107,15 @@ public class UserService {
     @Transactional
     public Optional<UserEntity> findUser(String uid){
         return userRepository.findOne(((root, query, cb) -> cb.equal(root.get("uid"), uid)));
+    }
+
+    @Transactional
+    public Optional<UserEntity> findUserById(String userId) {
+        if (!StringUtils.hasText(userId)) {
+            return Optional.empty();
+        }
+
+        return userRepository.findByUserId(userId);
     }
 
 
@@ -249,7 +296,10 @@ public class UserService {
                 throw new UserProtectedAttributeException(matchProjectList.getFirst().toUpperCase());
             }
 
-            List<UserAttributeEntity> userAttrList = userAttributeService.getConfigs(updateProp.getConfig().keySet().stream().map(String::toUpperCase).toList());
+                List<UserAttributeEntity> userAttrList = userAttributeService.getConfigs(
+                    userEntity.getUid(),
+                    updateProp.getConfig().keySet().stream().map(String::toUpperCase).toList()
+                );
 
             for(String key : updateProp.getConfig().keySet()){
                 UserAttributeEntity matchAttr = userAttrList.stream().filter(x->x.getAttrKey().equals(key.toUpperCase()))

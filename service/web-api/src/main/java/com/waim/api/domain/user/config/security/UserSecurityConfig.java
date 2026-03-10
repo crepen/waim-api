@@ -59,7 +59,7 @@ public class UserSecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.anyRequest().hasRole("ADMIN")
+                        auth.anyRequest().hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                 )
                 .addFilterBefore(new JwtSecurityFilter(jwtTokenProvider , userService), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(handler -> handler
