@@ -107,7 +107,7 @@ services:
       "--dbfilename", "dump_waim.rdb"
     ]
     environment:
-      - REDIS_PASSWORD=${WAIM_REDIS_PASSWORD}
+      - REDIS_PASSWORD=${W_REDIS_PASSWORD}
     networks:
       - crepen-waim-network
     volumes:
