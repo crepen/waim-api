@@ -17,7 +17,7 @@ public class JasyptTest {
 
     @Test
     void generate(){
-        String targetText = "1";
+        String targetText = System.getenv("JASYPT_TEXT");
 //        String password =  System.getProperty("jasypt.encryptor.password");
         String password = System.getenv("JASYPT_PWD");
 
@@ -44,5 +44,46 @@ public class JasyptTest {
         System.out.println("Original: " + targetText);
         System.out.println("Encrypted: ENC(" + encryptedText + ")");
         System.out.println("========================================");
+
+
+
+        System.out.println("========================================");
+        System.out.println("Encrypt String: " + encryptedText);
+        System.out.println("Decrypted: " + encryptor.decrypt(encryptedText));
+        System.out.println("========================================");
     }
+
+
+    @Test
+    void decrypt(){
+        String targetText = "P1B2DSilI3GCDISRGV1eNubIpXaWtHd7jKG6FoE4nrg=";
+//        String password =  System.getProperty("jasypt.encryptor.password");
+        String password = System.getenv("JASYPT_PWD");
+
+        System.out.println("Read Password : " + password);
+
+        PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
+        SimpleStringPBEConfig config = new SimpleStringPBEConfig();
+
+        // 마스터 키 설정
+        config.setPassword(password);
+        config.setAlgorithm("PBEWithMD5AndDES");
+        config.setKeyObtentionIterations("1000");
+        config.setPoolSize("1");
+        config.setProviderName("SunJCE");
+        config.setSaltGeneratorClassName("org.jasypt.salt.RandomSaltGenerator");
+        config.setIvGeneratorClassName("org.jasypt.iv.NoIvGenerator");
+        config.setStringOutputType("base64");
+        encryptor.setConfig(config);
+
+        String decryptedText = encryptor.decrypt(targetText);
+
+        System.out.println("========================================");
+        System.out.println("Original: " + targetText.length());
+        System.out.println("Encrypt String: " + targetText);
+        System.out.println("Decrypted: " + decryptedText);
+        System.out.println("========================================");
+    }
+
+
 }
