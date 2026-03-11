@@ -51,7 +51,7 @@ public class JasyptConfig {
             return systemProp;
         }
         // 2. 환경 변수 (WAIM_JASYPT_PASSWORD → JASYPT_PASSWORD)
-        String envVar = System.getenv("WAIM_JASYPT_PASSWORD");
+        String envVar = System.getenv("W_JASYPT_PASSWORD");
         if (envVar == null || envVar.isEmpty()) {
             envVar = System.getenv("JASYPT_PASSWORD");
         }
