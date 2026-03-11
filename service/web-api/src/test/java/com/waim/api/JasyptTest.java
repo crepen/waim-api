@@ -17,7 +17,7 @@ public class JasyptTest {
 
     @Test
     void generate(){
-        String targetText = System.getenv("JASYPT_TEXT");
+        String targetText = "";
 //        String password =  System.getProperty("jasypt.encryptor.password");
         String password = System.getenv("JASYPT_PWD");
 
@@ -38,7 +38,7 @@ public class JasyptTest {
         encryptor.setConfig(config);
 
 
-        String encryptedText = encryptor.encrypt(targetText);
+        String encryptedText = encryptor.encrypt(targetText.replace("\n" , ""));
 
         System.out.println("========================================");
         System.out.println("Original: " + targetText);
@@ -56,8 +56,10 @@ public class JasyptTest {
 
     @Test
     void decrypt(){
-        String targetText = "P1B2DSilI3GCDISRGV1eNubIpXaWtHd7jKG6FoE4nrg=";
+        String inText = "".replace("\n" , "");
 //        String password =  System.getProperty("jasypt.encryptor.password");
+        String targetText = inText
+                .substring(4 , inText.length() - 1);
         String password = System.getenv("JASYPT_PWD");
 
         System.out.println("Read Password : " + password);

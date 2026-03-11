@@ -1,9 +1,9 @@
 waim:
   jwt:
-    secret: ${WAIM_JWT_SECRET}
+    secret: ${W_JWT_SECRET}
     expire_access: 1h
     expire_refresh: 7d
 
   crypto:
-    key: ${WAIM_CRYPTO_KEY}
-    salt: ${WAIM_CRYPTO_SALT}
+    key: ${W_CRYPTO_KEY}
+    salt: ${W_CRYPTO_SALT}
