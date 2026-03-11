@@ -15,6 +15,10 @@ services:
       - WAIM_DB_PASSWORD_ENC=${WAIM_DB_PASSWORD_ENC}
       # JASYPT
       - WAIM_JASYPT_PASSWORD=${WAIM_JASYPT_PASSWORD}
+      # JWT & CRYPTO
+      - WAIM_JWT_SECRET=${WAIM_JWT_SECRET}
+      - WAIM_CRYPTO_KEY=${WAIM_CRYPTO_KEY}
+      - WAIM_CRYPTO_SALT=${WAIM_CRYPTO_SALT}
     volumes:
       - ${WAIM_API_VOLUME_LOG:-/app/docker/volume/waim/api/logs}:/application/logs
     restart: always

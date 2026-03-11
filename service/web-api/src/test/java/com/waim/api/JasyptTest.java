@@ -17,8 +17,9 @@ public class JasyptTest {
 
     @Test
     void generate(){
-        String targetText = "a1b2c3d4e5f60789";
-        String password = System.getProperty("jasypt.encryptor.password");
+        String targetText = "1";
+//        String password =  System.getProperty("jasypt.encryptor.password");
+        String password = System.getenv("JASYPT_PWD");
 
         System.out.println("Read Password : " + password);
 
