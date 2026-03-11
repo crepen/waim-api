@@ -4,20 +4,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 
 @Slf4j
 @Configuration
 @Primary
 public class JasyptConfig {
 
-
     @Bean("jasyptStringEncryptor")
     public StringEncryptor stringEncryptor() {
+
         log.info(">>> LOAD JASYPT ENCRYPTOR");
         PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
         SimpleStringPBEConfig config = new SimpleStringPBEConfig();
@@ -25,6 +29,7 @@ public class JasyptConfig {
         if (password == null || password.isEmpty()) {
             throw new RuntimeException("Jasypt 마스터 키를 찾을 수 없습니다. 실행 옵션이나 환경 변수를 확인하세요.");
         }
+        log.info("KEY : {}" , password);
         config.setPassword(password);
         config.setAlgorithm("PBEWithMD5AndDES");
         config.setKeyObtentionIterations("1000");
@@ -34,6 +39,7 @@ public class JasyptConfig {
         config.setIvGeneratorClassName("org.jasypt.iv.NoIvGenerator");
         config.setStringOutputType("base64");
         encryptor.setConfig(config);
+
         return encryptor;
     }
 
