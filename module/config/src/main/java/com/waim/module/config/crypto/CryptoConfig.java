@@ -29,13 +29,7 @@ public class CryptoConfig {
 
     @Bean
     public TextEncryptor textEncryptor(){
-        log.info(">>> LOAD TEXT ENCRYPTOR");
-        log.info("================DS==================");
-        log.info("SALT : {}" , salt);
-        log.info("KEY : {}" , cryptoKey);
-        log.info("================DS==================");
-
-        return Encryptors.delux(cryptoKey , salt);
+       return Encryptors.delux(cryptoKey , salt);
     }
 
     @Bean

@@ -29,7 +29,6 @@ public class JasyptConfig {
         if (password == null || password.isEmpty()) {
             throw new RuntimeException("Jasypt 마스터 키를 찾을 수 없습니다. 실행 옵션이나 환경 변수를 확인하세요.");
         }
-        log.info("KEY : {}" , password);
         config.setPassword(password);
         config.setAlgorithm("PBEWithMD5AndDES");
         config.setKeyObtentionIterations("1000");

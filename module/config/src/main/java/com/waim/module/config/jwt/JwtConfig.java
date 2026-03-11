@@ -28,9 +28,6 @@ public class JwtConfig {
 
     @Bean
     public JwtProvider jwtConfig() {
-
-        log.info(">>> LOAD JWT PROVIDER");
-
         Duration expAccessDur = DurationStyle.SIMPLE.parse(expire_access);
         Duration expRefreshDur = DurationStyle.SIMPLE.parse(expire_refresh);
 
