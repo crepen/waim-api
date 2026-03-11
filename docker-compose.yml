@@ -53,15 +53,19 @@ services:
       - SPRING_PROFILES_ACTIVE=${WAIM_SPRING_PROFILE:-prod}
       - SPRING_THREADS_VIRTUAL_ENABLED=true
       # REDIS Conn
-      - WAIM_REDIS_HOST=${WAIM_REDIS_HOST}
-      - WAIM_REDIS_PORT=${WAIM_REDIS_PORT}
-      - WAIM_REDIS_PASSWORD=${WAIM_REDIS_PASSWORD_ENC}
+      - W_REDIS_HOST=${W_REDIS_HOST}
+      - W_REDIS_PORT=${W_REDIS_PORT}
+      - W_REDIS_PASSWORD=${W_REDIS_PASSWORD}
       # DATABASE
-      - WAIM_DB_URL_ENC=${WAIM_DB_URL_ENC}
-      - WAIM_DB_USERNAME_ENC=${WAIM_DB_USERNAME_ENC}
-      - WAIM_DB_PASSWORD_ENC=${WAIM_DB_PASSWORD_ENC}
+      - W_DB_URL=${W_DB_URL}
+      - W_DB_USERNAME=${W_DB_USERNAME}
+      - W_DB_PASSWORD=${W_DB_PASSWORD}
       # JASYPT
-      - WAIM_JASYPT_PASSWORD=${WAIM_JASYPT_PASSWORD}
+      - W_JASYPT_PASSWORD=${W_JASYPT_PASSWORD}
+      # JWT & CRYPTO
+      - W_JWT_SECRET=${W_JWT_SECRET}
+      - W_CRYPTO_KEY=${W_CRYPTO_KEY}
+      - W_CRYPTO_SALT=${W_CRYPTO_SALT}
     volumes:
       - ${WAIM_SCHEDULER_VOLUME_LOG:-/app/docker/volume/waim/scheduler/logs}:/application/logs
     restart: always
@@ -99,7 +103,7 @@ services:
     command: [
       "valkey-server",
       "/usr/local/etc/valkey/valkey.conf",
-      "--requirepass", "${WAIM_REDIS_PASSWORD}",
+      "--requirepass", "${W_REDIS_PASSWORD}",
       "--dbfilename", "dump_waim.rdb"
     ]
     environment:
