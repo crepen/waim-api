@@ -6,9 +6,12 @@ import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 @Slf4j
 @Configuration
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class JasyptConfig {
 
 
