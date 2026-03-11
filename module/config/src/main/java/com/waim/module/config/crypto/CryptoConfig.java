@@ -2,9 +2,12 @@ package com.waim.module.config.crypto;
 
 import com.waim.module.util.crypto.CryptoProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
@@ -12,7 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @Slf4j
+@Order(0)
 public class CryptoConfig {
+
 
     @Value("${waim.crypto.salt:8f2d63e1a0b4c5d9}")
     private String salt;
@@ -24,6 +29,7 @@ public class CryptoConfig {
 
     @Bean
     public TextEncryptor textEncryptor(){
+        log.info(">>> LOAD TEXT ENCRYPTOR");
         log.info("================DS==================");
         log.info("SALT : {}" , salt);
         log.info("KEY : {}" , cryptoKey);
