@@ -1,5 +1,6 @@
 dependencies {
     implementation project(':module:core')
+    implementation project(':module:util')
 
     // Valkey(Redis 호환) 조회
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
@@ -7,6 +8,7 @@ dependencies {
 
     // RabbitMQ 메시지 구독(Listen)
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'org.springframework.security:spring-security-crypto'
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 

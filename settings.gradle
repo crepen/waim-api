@@ -24,7 +24,7 @@ include ':module:util'
 include ':module:config'
 
 
-include ':service:web-api', ':service:waim-scheduler', ':service:task-master', ':service:task-worker'
+include ':service:web-api', ':service:waim-scheduler', ':service:task-worker'
 
 
 include ':deprecate_waim-core'

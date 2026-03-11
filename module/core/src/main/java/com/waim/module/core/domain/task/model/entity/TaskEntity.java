@@ -10,7 +10,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,13 +70,12 @@ public class TaskEntity extends GlobalTimeEntity {
     private TaskType taskType;
 
 
-    @Builder.Default
     @Column(
             name = "next_run_timestamp",
             columnDefinition = "TIMESTAMP",
             comment = "다음 Task 실행 시각"
     )
-    private OffsetDateTime nextRunTimestamp = OffsetDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+    private OffsetDateTime nextRunTimestamp;
 
 
     @Builder.Default

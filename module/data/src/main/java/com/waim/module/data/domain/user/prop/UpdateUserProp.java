@@ -15,6 +15,5 @@ public class UpdateUserProp {
     private String email;
     private String name;
     private String role;
-    private String status;
     private Map<String , String> config;
 }

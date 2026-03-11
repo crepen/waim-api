@@ -42,7 +42,7 @@ public class ConfigureModuleSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/config/global").permitAll()
-                        .anyRequest().hasRole("ADMIN")
+                        .anyRequest().hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                 )
                 .addFilterBefore(new JwtSecurityFilter(jwtProvider , userService ), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(handler -> handler

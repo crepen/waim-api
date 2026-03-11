@@ -15,9 +15,6 @@ public class UpdateAdminUserRequest {
     @JsonProperty("user_email")
     private String email;
 
-    @JsonProperty("user_status")
-    private String status;
-
     @JsonProperty("user_password")
     private String password;
 

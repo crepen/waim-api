@@ -15,6 +15,5 @@ public class UpdateUserRequest {
     private String password;
     private String email;
     private String role;
-    private String status;
     private Map<String , String> config;
 }

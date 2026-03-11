@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface ProjectRepository extends JpaRepository<ProjectEntity, String> , JpaSpecificationExecutor<ProjectEntity> {
 	long countByProjectGroup_Uid(String groupUid);
 
+	boolean existsByProjectAliasAndProjectGroup_Uid(String projectAlias, String groupUid);
+
 }

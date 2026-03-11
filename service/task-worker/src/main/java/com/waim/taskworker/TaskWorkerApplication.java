@@ -11,8 +11,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
             org.redisson.spring.starter.RedissonAutoConfigurationV2.class
     }
 )
-@EnableJpaRepositories(basePackages = "com.waim.core")
-@EntityScan(basePackages = "com.waim.core")
+@EnableJpaRepositories(basePackages = "com.waim.module.core")
+@EntityScan(basePackages = "com.waim.module.core")
 public class TaskWorkerApplication {
 
     public static void main(String[] args) {

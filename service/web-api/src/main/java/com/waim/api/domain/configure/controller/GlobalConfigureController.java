@@ -1,8 +1,10 @@
 package com.waim.api.domain.configure.controller;
 
 import com.waim.api.common.model.response.BaseResponse;
+import com.waim.api.domain.configure.model.request.UpdateSmtpGlobalConfigRequest;
 import com.waim.api.domain.configure.model.request.UpdateGlobalConfigRequest;
 import com.waim.api.domain.configure.model.response.ConfigResponse;
+import com.waim.api.domain.configure.service.SmtpGlobalConfigService;
 import com.waim.module.core.system.config.model.entity.SystemConfigEntity;
 import com.waim.module.core.system.config.service.SystemConfigService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @Slf4j
@@ -21,6 +22,7 @@ import java.util.Map;
 public class GlobalConfigureController {
 
     private final SystemConfigService systemConfigService;
+        private final SmtpGlobalConfigService smtpGlobalConfigService;
 
     @GetMapping("")
     @Operation(
@@ -64,6 +66,36 @@ public class GlobalConfigureController {
         return ResponseEntity.ok().body(
                 BaseResponse.Success.builder()
                         .build()
+        );
+    }
+
+    @PostMapping("/smtp")
+    @Operation(
+            summary = "SMTP System config 설정",
+            description = "SMTP 연결 테스트 후 설정값을 저장합니다. 테스트 실패 시 저장하지 않습니다."
+    )
+    public ResponseEntity<?> updateSmtpGlobalConfig(
+            @RequestBody UpdateSmtpGlobalConfigRequest reqBody
+    ) {
+        smtpGlobalConfigService.validateAndSave(reqBody);
+
+        return ResponseEntity.ok().body(
+                BaseResponse.Success.builder().build()
+        );
+    }
+
+    @PostMapping("/smtp/test")
+    @Operation(
+            summary = "SMTP 연결 테스트",
+            description = "저장 없이 SMTP 연결 테스트만 수행합니다."
+    )
+    public ResponseEntity<?> testSmtpGlobalConfig(
+            @RequestBody UpdateSmtpGlobalConfigRequest reqBody
+    ) {
+        smtpGlobalConfigService.validateOnly(reqBody);
+
+        return ResponseEntity.ok().body(
+                BaseResponse.Success.builder().build()
         );
     }
 

@@ -37,6 +37,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class GroupService {
 
+    private static final int MAX_GROUP_DEPTH = 6;
+
     private final GroupRepository groupRepository;
     private final GroupRoleRepository groupRoleRepository;
     private final ProjectRepository projectRepository;
@@ -77,8 +79,19 @@ public class GroupService {
         validateGroupName(prop.getGroupName());
         validateGroupAlias(prop.getGroupAlias());
 
-        if (groupRepository.existsByGroupAlias(prop.getGroupAlias())) {
-            throw new GroupDuplicateAliasException();
+        GroupEntity parentGroup = null;
+        String parentGroupUid = null;
+
+        if (StringUtils.hasText(prop.getParentGroupUid())) {
+            parentGroup = groupRepository.findById(prop.getParentGroupUid())
+                    .orElseThrow(GroupNotFoundException::new);
+            parentGroupUid = parentGroup.getUid();
+        }
+
+        validateGroupAliasUniqueness(prop.getGroupAlias(), parentGroupUid, null);
+
+        if (parentGroup != null && getDepth(parentGroup) >= MAX_GROUP_DEPTH) {
+            throw new GroupInvalidParentException();
         }
 
         GroupEntity newGroup = GroupEntity.builder()
@@ -86,9 +99,7 @@ public class GroupService {
                 .groupAlias(prop.getGroupAlias())
                 .build();
 
-        if (StringUtils.hasText(prop.getParentGroupUid())) {
-            GroupEntity parentGroup = groupRepository.findById(prop.getParentGroupUid())
-                    .orElseThrow(GroupNotFoundException::new);
+        if (parentGroup != null) {
             newGroup.setParentGroupUid(parentGroup);
         }
 
@@ -123,10 +134,8 @@ public class GroupService {
         GroupEntity groupEntity = groupRepository.findById(prop.getGroupUid())
                 .orElseThrow(GroupNotFoundException::new);
 
-        if (!groupEntity.getGroupAlias().equals(prop.getGroupAlias())
-                && groupRepository.existsByGroupAlias(prop.getGroupAlias())) {
-            throw new GroupDuplicateAliasException();
-        }
+        GroupEntity parentGroup = null;
+        String parentGroupUid = null;
 
         groupEntity.setGroupName(prop.getGroupName());
         groupEntity.setGroupAlias(prop.getGroupAlias());
@@ -136,13 +145,25 @@ public class GroupService {
                 throw new GroupInvalidParentException();
             }
 
-            GroupEntity parentGroup = groupRepository.findById(prop.getParentGroupUid())
+            parentGroup = groupRepository.findById(prop.getParentGroupUid())
                     .orElseThrow(GroupNotFoundException::new);
+            parentGroupUid = parentGroup.getUid();
+
+            if (wouldCreateCycle(groupEntity, parentGroup)) {
+                throw new GroupInvalidParentException();
+            }
+
+            if (getDepth(parentGroup) >= MAX_GROUP_DEPTH) {
+                throw new GroupInvalidParentException();
+            }
+
             groupEntity.setParentGroupUid(parentGroup);
         }
         else {
             groupEntity.setParentGroupUid(null);
         }
+
+        validateGroupAliasUniqueness(prop.getGroupAlias(), parentGroupUid, groupEntity.getUid());
 
         return groupRepository.save(groupEntity);
     }
@@ -274,6 +295,51 @@ public class GroupService {
         if (!groupAlias.matches("^[a-z0-9_]+$")) {
             throw new GroupInvalidAliasException();
         }
+    }
+
+    private void validateGroupAliasUniqueness(String groupAlias, String parentGroupUid, String selfUid) {
+        boolean duplicated;
+
+        if (StringUtils.hasText(parentGroupUid)) {
+            duplicated = StringUtils.hasText(selfUid)
+                    ? groupRepository.existsByGroupAliasAndParentGroupUid_UidAndUidNot(groupAlias, parentGroupUid, selfUid)
+                    : groupRepository.existsByGroupAliasAndParentGroupUid_Uid(groupAlias, parentGroupUid);
+        }
+        else {
+            duplicated = StringUtils.hasText(selfUid)
+                    ? groupRepository.existsByGroupAliasAndParentGroupUidIsNullAndUidNot(groupAlias, selfUid)
+                    : groupRepository.existsByGroupAliasAndParentGroupUidIsNull(groupAlias);
+        }
+
+        if (duplicated) {
+            throw new GroupDuplicateAliasException();
+        }
+    }
+
+    private int getDepth(GroupEntity group) {
+        int depth = 0;
+        GroupEntity current = group;
+
+        while (current != null) {
+            depth += 1;
+            current = current.getParentGroupUid();
+        }
+
+        return depth;
+    }
+
+    private boolean wouldCreateCycle(GroupEntity source, GroupEntity targetParent) {
+        GroupEntity current = targetParent;
+
+        while (current != null) {
+            if (source.getUid().equals(current.getUid())) {
+                return true;
+            }
+
+            current = current.getParentGroupUid();
+        }
+
+        return false;
     }
 
     private boolean hasGroupAdminPermission(String groupUid, String actionUserUid) {

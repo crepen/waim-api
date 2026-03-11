@@ -1,24 +1,60 @@
 spring:
-  main:
-    cloud-platform: KUBERNETES
   application:
     name: waim-scheduler
+
   config:
     import: classpath:waim.yml
+
   datasource:
-    hikari:
-      connection-timeout: 3000 # 3초 이내 연결 안되면 실패
-    data:
-      redis:
-        connect-timeout: 2000ms # 2초
+    url: ENC(e2qyP8ShC+KwMgc5YsexM2J1Z3Zi4SQ7xcFMy3ghIahWfi17A98fFzo1KoSMzcrPLOFoMprXmGo=)
+    username: ENC(0Ev5zUmMsZDclnk4b0djxQ==)
+    password: ENC(fyWd330KZIsVjBdiUUGwY0R2/ahvG2+i)
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.MariaDBDialect
+        jdbc:
+          time_zone: UTC
+
+  data:
+    redis:
+      connect-timeout: 2000ms # 2초
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
   autoconfigure:
     exclude:
-    # Spring security 보안 자동 설정 해제
-     - org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration
-     - org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
+      - org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration
+      - org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
 
 server:
   port: 8082
+
+# Actuator (Health Check & Metrics)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers,circuitbreakerevents
+  endpoint:
+    health:
+      show-details: never
+  simple:
+    metrics:
+      export:
+        enabled: true
 
 # Resilience4j CircuitBreaker
 resilience4j:
@@ -51,18 +87,6 @@ resilience4j:
           - org.springframework.dao.QueryTimeoutException
           - io.lettuce.core.RedisCommandTimeoutException
 
-management:
-  endpoint:
-    health:
-      show-details: always  # 상세 상태 노출
-  health:
-    defaults:
-      enabled: true
-    db:
-      enabled: true
-    redis:
-      enabled: true
-
 logging:
   file:
     name: ${log.dir:logs}/${spring.application.name}.log
@@ -71,6 +95,7 @@ logging:
       file-name-pattern: ${log.dir:logs}/${spring.application.name}.%d{yyyy-MM-dd}.%i.log
       max-history: 20
   level:
+    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: ERROR
     root: INFO
     com.waim: info
 

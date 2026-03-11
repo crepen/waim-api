@@ -1,13 +1,18 @@
 package com.waim.taskworker.config;
 
 
-import com.waim.core.common.util.jwt.JwtTokenProvider;
+import com.waim.module.util.jwt.JwtProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
+
 @Configuration
 public class JwtConfig {
+
+    @Value("${waim.jwt.issuer:waim}")
+    private String jwtIssuer;
 
     @Value("${waim.jwt.secret}")
 
@@ -29,8 +34,13 @@ public class JwtConfig {
 
 
     @Bean
-    public JwtTokenProvider jwtTokenProvider() {
-        return new JwtTokenProvider(jwtSecret, tokenExpiration, refreshTokenExpiration);
+    public JwtProvider jwtProvider() {
+        return new JwtProvider(
+                jwtIssuer,
+                jwtSecret,
+                Duration.ofMillis(tokenExpiration),
+                Duration.ofMillis(refreshTokenExpiration)
+        );
     }
 
 }

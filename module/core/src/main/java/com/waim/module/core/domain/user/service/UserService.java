@@ -5,10 +5,12 @@ import com.waim.module.core.domain.user.model.entity.UserAttributeEntity;
 import com.waim.module.core.domain.user.model.entity.UserEntity;
 import com.waim.module.core.domain.user.model.error.*;
 import com.waim.module.core.domain.user.repository.UserRepository;
+import com.waim.module.core.system.config.service.SystemConfigService;
 import com.waim.module.data.domain.user.*;
 import com.waim.module.data.domain.user.prop.AddUserProp;
 import com.waim.module.data.domain.user.prop.RemoveUserProp;
 import com.waim.module.data.domain.user.prop.UpdateUserProp;
+import com.waim.module.data.system.config.SystemConfigKey;
 import com.waim.module.util.crypto.CryptoProvider;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -22,18 +24,37 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
+    private static final String LOWERCASE_CHARSET = "abcdefghijklmnopqrstuvwxyz";
+    private static final String UPPERCASE_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String NUMBER_CHARSET = "0123456789";
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    private static final int TEMP_PASSWORD_MAX_GENERATE_ATTEMPT = 100;
+    private static final String DEFAULT_USER_SIGNUP_ENABLE = "yes";
+    private static final String DEFAULT_USER_SIGNUP_REQUIRE_ADMIN_APPROVAL = "yes";
+    private static final String DEFAULT_USER_SIGNUP_PASSWORD_REQUIREMENT = "^(?=.*[a-z])(?=.*[A-Z]).{8,}$";
+    private static final String DEFAULT_USER_SIGNUP_PASSWORD_REQUIRE_UPPERCASE = "yes";
+    private static final String DEFAULT_USER_SIGNUP_PASSWORD_REQUIRE_SYMBOL = "no";
+    private static final String DEFAULT_USER_SIGNUP_PASSWORD_ALLOWED_SYMBOLS = "!@#$%^&*()-_=+[]{};:,.?";
+    private static final String DEFAULT_USER_SIGNUP_PASSWORD_REQUIRE_NUMBER = "no";
+    private static final int DEFAULT_USER_SIGNUP_PASSWORD_MIN_LENGTH = 8;
+    private static final int DEFAULT_USER_SIGNUP_PASSWORD_MAX_LENGTH = 64;
 
     private final UserRepository userRepository;
+    private final SystemConfigService systemConfigService;
     private final CryptoProvider cryptoProvider;
     private final PasswordEncoder passwordEncoder;
     private final UserAttributeService userAttributeService;
+    private final Random random = new java.security.SecureRandom();
 
 
     // region Runtime method
@@ -106,7 +127,10 @@ public class UserService {
 
     @Transactional
     public Optional<UserEntity> findUser(String uid){
-        return userRepository.findOne(((root, query, cb) -> cb.equal(root.get("uid"), uid)));
+        return userRepository.findOne((root, query, cb) -> cb.and(
+                cb.equal(root.get("uid"), uid),
+                cb.notEqual(root.get("userStatus"), UserStatus.DELETE)
+        ));
     }
 
     @Transactional
@@ -115,7 +139,10 @@ public class UserService {
             return Optional.empty();
         }
 
-        return userRepository.findByUserId(userId);
+        return userRepository.findOne((root, query, cb) -> cb.and(
+                cb.equal(root.get("userId"), userId),
+                cb.notEqual(root.get("userStatus"), UserStatus.DELETE)
+        ));
     }
 
 
@@ -176,9 +203,15 @@ public class UserService {
             throw new UserEmptyPasswordException();
         }
 
+        validatePasswordByPolicy(addUserProp.getPassword());
+
         if(!StringUtils.hasText(addUserProp.getEmail())){
             // Empty Email
             throw new UserEmptyEmailException();
+        }
+
+        if (!isValidEmail(addUserProp.getEmail())) {
+            throw new UserInvalidEmailException();
         }
 
         String emailHash = cryptoProvider.staticHash(addUserProp.getEmail());
@@ -208,14 +241,30 @@ public class UserService {
 
 
 
+        UserRole targetRole = addUserProp.getRole() == null ? UserRole.GENERAL : addUserProp.getRole();
+
+        if (targetRole == UserRole.GENERAL && !isSignupEnabled()) {
+            throw new UserSignupDisabledException();
+        }
+
+        UserStatus targetStatus = addUserProp.getStatus();
+
+        if (targetRole == UserRole.GENERAL) {
+            targetStatus = isSignupRequireAdminApproval() ? UserStatus.INACTIVE : UserStatus.ACTIVE;
+        }
+
+        if (targetStatus == null) {
+            targetStatus = UserStatus.ACTIVE;
+        }
+
         UserEntity addUserEntity = UserEntity.builder()
                 .userId(addUserProp.getId())
                 .userName(addUserProp.getName())
                 .userPassword(passwordEncoder.encode(addUserProp.getPassword()))
                 .userEmail(addUserProp.getEmail())
                 .userEmailHash(emailHash)
-                .userStatus(addUserProp.getStatus())
-                .userRole(addUserProp.getRole())
+                .userStatus(targetStatus)
+                .userRole(targetRole)
                 .build();
 
         userRepository.save(addUserEntity);
@@ -238,11 +287,16 @@ public class UserService {
 
         // Update Password
         if(StringUtils.hasText(updateProp.getPassword())){
+            validatePasswordByPolicy(updateProp.getPassword());
             userEntity.setUserPassword(passwordEncoder.encode(updateProp.getPassword()));
         }
 
         // Update email
         if(StringUtils.hasText(updateProp.getEmail())){
+            if (!isValidEmail(updateProp.getEmail())) {
+                throw new UserInvalidEmailException();
+            }
+
             userEntity.setUserEmail(updateProp.getEmail());
             userEntity.setUserEmailHash(cryptoProvider.staticHash(updateProp.getEmail()));
         }
@@ -266,21 +320,6 @@ public class UserService {
 
 
             userEntity.setUserRole(userRole);
-        }
-
-        // Update status
-        if(StringUtils.hasText(updateProp.getStatus())){
-            UserStatus userStatus;
-
-            try{
-                userStatus = Enum.valueOf(UserStatus.class, updateProp.getStatus().toUpperCase());
-            }
-            catch (Exception ex) {
-                throw new UserUnsupportedStatusException();
-            }
-
-
-            userEntity.setUserStatus(userStatus);
         }
 
         // Update user config
@@ -316,6 +355,54 @@ public class UserService {
         }
 
         userRepository.save(userEntity);
+    }
+
+    @Transactional
+    public void approveUser(String userUid) {
+        UserEntity userEntity = getMutableUser(userUid);
+        userEntity.setUserStatus(UserStatus.ACTIVE);
+        userRepository.save(userEntity);
+    }
+
+    @Transactional
+    public void blockUser(String userUid) {
+        UserEntity userEntity = getMutableUser(userUid);
+        userEntity.setUserStatus(UserStatus.BLOCK);
+        userRepository.save(userEntity);
+    }
+
+    @Transactional
+    public void softDeleteUser(String userUid) {
+        UserEntity userEntity = getMutableUser(userUid);
+
+        if (userEntity.getUserStatus() == UserStatus.DELETE) {
+            throw new UserAlreadyDeleteException();
+        }
+
+        userEntity.setUserStatus(UserStatus.DELETE);
+        userRepository.save(userEntity);
+    }
+
+    private UserEntity getMutableUser(String userUid) {
+        if (!StringUtils.hasText(userUid)) {
+            throw new UserEmptyUidException();
+        }
+
+        Optional<UserEntity> matchUser = userRepository.findByUid(userUid);
+
+        if (matchUser.isEmpty() || matchUser.get().getUserStatus() == UserStatus.DELETE) {
+            throw new UserNotFoundException();
+        }
+
+        return matchUser.get();
+    }
+
+    private boolean isValidEmail(String email) {
+        if (!StringUtils.hasText(email)) {
+            return false;
+        }
+
+        return EMAIL_PATTERN.matcher(email.trim()).matches();
     }
 
     @Transactional
@@ -375,6 +462,119 @@ public class UserService {
         userRepository.save(userEntity);
     }
 
+    @Transactional
+    public String resetPasswordByEmail(String email) {
+        if (!StringUtils.hasText(email)) {
+            throw new UserEmptyEmailException();
+        }
+
+        String emailHash = cryptoProvider.staticHash(email.trim());
+
+        Optional<UserEntity> userOpt = userRepository.findOne(
+                (root, query, cb) -> cb.and(
+                        cb.equal(root.get("userEmailHash"), emailHash),
+                        cb.notEqual(root.get("userStatus"), UserStatus.DELETE)
+                )
+        );
+
+        if (userOpt.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
+        String temporaryPassword = generateTemporaryPasswordByPolicy();
+        updateUserPassword(userOpt.get(), temporaryPassword);
+        return temporaryPassword;
+    }
+
+    @Transactional
+    public String generateTemporaryPasswordByPolicy() {
+        int minLength = getIntConfigValue(
+                SystemConfigKey.USER_SIGNUP_PASSWORD_MIN_LENGTH.name(),
+                DEFAULT_USER_SIGNUP_PASSWORD_MIN_LENGTH
+        );
+
+        int maxLength = getIntConfigValue(
+                SystemConfigKey.USER_SIGNUP_PASSWORD_MAX_LENGTH.name(),
+                DEFAULT_USER_SIGNUP_PASSWORD_MAX_LENGTH
+        );
+
+        if (maxLength < minLength) {
+            maxLength = minLength;
+        }
+
+        int targetLength = minLength;
+
+        boolean requireUppercase = getBooleanConfigValue(
+                SystemConfigKey.USER_SIGNUP_PASSWORD_REQUIRE_UPPERCASE.name(),
+                DEFAULT_USER_SIGNUP_PASSWORD_REQUIRE_UPPERCASE
+        );
+
+        boolean requireNumber = getBooleanConfigValue(
+                SystemConfigKey.USER_SIGNUP_PASSWORD_REQUIRE_NUMBER.name(),
+                DEFAULT_USER_SIGNUP_PASSWORD_REQUIRE_NUMBER
+        );
+
+        boolean requireSymbol = getBooleanConfigValue(
+                SystemConfigKey.USER_SIGNUP_PASSWORD_REQUIRE_SYMBOL.name(),
+                DEFAULT_USER_SIGNUP_PASSWORD_REQUIRE_SYMBOL
+        );
+
+        String allowedSymbols = systemConfigService.getConfig(
+                        SystemConfigKey.USER_SIGNUP_PASSWORD_ALLOWED_SYMBOLS.name()
+                )
+                .map(config -> config.getConfigValue())
+                .filter(StringUtils::hasText)
+                .orElse(DEFAULT_USER_SIGNUP_PASSWORD_ALLOWED_SYMBOLS);
+
+        for (int attempt = 0; attempt < TEMP_PASSWORD_MAX_GENERATE_ATTEMPT; attempt++) {
+            List<Character> passwordChars = new ArrayList<>();
+            passwordChars.add(randomChar(LOWERCASE_CHARSET));
+
+            String candidatePool = LOWERCASE_CHARSET + UPPERCASE_CHARSET + NUMBER_CHARSET;
+
+            if (requireUppercase) {
+                passwordChars.add(randomChar(UPPERCASE_CHARSET));
+            }
+
+            if (requireNumber) {
+                passwordChars.add(randomChar(NUMBER_CHARSET));
+            }
+
+            if (requireSymbol && StringUtils.hasText(allowedSymbols)) {
+                passwordChars.add(randomChar(allowedSymbols));
+                candidatePool += allowedSymbols;
+            }
+
+            if (!StringUtils.hasText(candidatePool)) {
+                candidatePool = LOWERCASE_CHARSET + UPPERCASE_CHARSET + NUMBER_CHARSET;
+            }
+
+            while (passwordChars.size() < targetLength) {
+                passwordChars.add(randomChar(candidatePool));
+            }
+
+            Collections.shuffle(passwordChars, random);
+
+            StringBuilder passwordBuilder = new StringBuilder(passwordChars.size());
+            passwordChars.forEach(passwordBuilder::append);
+            String password = passwordBuilder.toString();
+
+            try {
+                validatePasswordByPolicy(password);
+                return password;
+            }
+            catch (UserInvalidPasswordPolicyException ignored) {
+                // Retry until a valid temporary password is generated.
+            }
+        }
+
+        throw new UserInvalidPasswordPolicyException();
+    }
+
+    private char randomChar(String source) {
+        return source.charAt(random.nextInt(source.length()));
+    }
+
     private List<UserEntity> getDuplicateUserList (String id , String name , String emailHash) {
         Specification<UserEntity> spec = (
                 (root, query, cb) -> {
@@ -401,5 +601,127 @@ public class UserService {
         );
 
         return userRepository.findAll(spec);
+    }
+
+    private boolean isSignupEnabled() {
+        return getBooleanConfigValue(
+                SystemConfigKey.USER_SIGNUP_ENABLED.name(),
+                DEFAULT_USER_SIGNUP_ENABLE
+        );
+    }
+
+    private boolean isSignupRequireAdminApproval() {
+        return getBooleanConfigValue(
+                SystemConfigKey.USER_SIGNUP_REQUIRE_ADMIN_APPROVAL.name(),
+                DEFAULT_USER_SIGNUP_REQUIRE_ADMIN_APPROVAL
+        );
+    }
+
+    private boolean getBooleanConfigValue(String key, String defaultValue) {
+        String rawValue = systemConfigService.getConfig(key)
+                .map(config -> config.getConfigValue())
+                .orElse(defaultValue);
+
+        if (!StringUtils.hasText(rawValue)) {
+            rawValue = defaultValue;
+        }
+
+        return "yes".equalsIgnoreCase(rawValue)
+                || "true".equalsIgnoreCase(rawValue)
+                || "y".equalsIgnoreCase(rawValue)
+                || "1".equals(rawValue);
+    }
+
+    private void validatePasswordByPolicy(String password) {
+        boolean hasStructuredPolicy = systemConfigService.getConfig(SystemConfigKey.USER_SIGNUP_PASSWORD_MIN_LENGTH.name()).isPresent()
+            || systemConfigService.getConfig(SystemConfigKey.USER_SIGNUP_PASSWORD_MAX_LENGTH.name()).isPresent()
+            || systemConfigService.getConfig(SystemConfigKey.USER_SIGNUP_PASSWORD_REQUIRE_UPPERCASE.name()).isPresent()
+            || systemConfigService.getConfig(SystemConfigKey.USER_SIGNUP_PASSWORD_REQUIRE_SYMBOL.name()).isPresent()
+            || systemConfigService.getConfig(SystemConfigKey.USER_SIGNUP_PASSWORD_REQUIRE_NUMBER.name()).isPresent();
+
+        boolean requireUppercase = getBooleanConfigValue(
+                SystemConfigKey.USER_SIGNUP_PASSWORD_REQUIRE_UPPERCASE.name(),
+                DEFAULT_USER_SIGNUP_PASSWORD_REQUIRE_UPPERCASE
+        );
+
+        boolean requireSymbol = getBooleanConfigValue(
+                SystemConfigKey.USER_SIGNUP_PASSWORD_REQUIRE_SYMBOL.name(),
+                DEFAULT_USER_SIGNUP_PASSWORD_REQUIRE_SYMBOL
+        );
+
+        boolean requireNumber = getBooleanConfigValue(
+                SystemConfigKey.USER_SIGNUP_PASSWORD_REQUIRE_NUMBER.name(),
+                DEFAULT_USER_SIGNUP_PASSWORD_REQUIRE_NUMBER
+        );
+
+        int minLength = getIntConfigValue(
+                SystemConfigKey.USER_SIGNUP_PASSWORD_MIN_LENGTH.name(),
+                DEFAULT_USER_SIGNUP_PASSWORD_MIN_LENGTH
+        );
+
+        int maxLength = getIntConfigValue(
+                SystemConfigKey.USER_SIGNUP_PASSWORD_MAX_LENGTH.name(),
+                DEFAULT_USER_SIGNUP_PASSWORD_MAX_LENGTH
+        );
+
+        if (maxLength < minLength) {
+            maxLength = minLength;
+        }
+
+        String allowedSymbols = systemConfigService.getConfig(
+                        SystemConfigKey.USER_SIGNUP_PASSWORD_ALLOWED_SYMBOLS.name()
+                )
+                .map(config -> config.getConfigValue())
+                .filter(StringUtils::hasText)
+                .orElse(DEFAULT_USER_SIGNUP_PASSWORD_ALLOWED_SYMBOLS);
+
+        boolean isValid = password.length() >= minLength && password.length() <= maxLength;
+
+        if (isValid && requireUppercase) {
+            isValid = password.chars().anyMatch(Character::isUpperCase);
+        }
+
+        if (isValid && requireNumber) {
+            isValid = password.chars().anyMatch(Character::isDigit);
+        }
+
+        if (isValid && requireSymbol) {
+            isValid = password.chars()
+                    .mapToObj(ch -> (char) ch)
+                    .anyMatch(ch -> allowedSymbols.indexOf(ch) >= 0);
+        }
+
+        // Backward compatibility for legacy regex-only policy values.
+        if (!hasStructuredPolicy) {
+            String passwordRegex = systemConfigService.getConfig(
+                            SystemConfigKey.USER_SIGNUP_PASSWORD_REQUIREMENT.name()
+                    )
+                    .map(config -> config.getConfigValue())
+                    .filter(StringUtils::hasText)
+                    .orElse(DEFAULT_USER_SIGNUP_PASSWORD_REQUIREMENT);
+
+            isValid = Pattern.compile(passwordRegex).matcher(password).matches();
+        }
+
+        if (!isValid) {
+            throw new UserInvalidPasswordPolicyException();
+        }
+    }
+
+    private int getIntConfigValue(String key, int defaultValue) {
+        String value = systemConfigService.getConfig(key)
+                .map(config -> config.getConfigValue())
+                .orElse(String.valueOf(defaultValue));
+
+        if (!StringUtils.hasText(value)) {
+            return defaultValue;
+        }
+
+        try {
+            return Integer.parseInt(value.trim());
+        }
+        catch (NumberFormatException ignored) {
+            return defaultValue;
+        }
     }
 }

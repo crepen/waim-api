@@ -4,8 +4,12 @@ import com.waim.module.core.domain.auth.model.error.AuthForbiddenException;
 import com.waim.module.core.domain.project.model.entity.ProjectEntity;
 import com.waim.module.core.domain.project.model.entity.ProjectRoleEntity;
 import com.waim.module.core.domain.project.model.error.ProjectAlreadyDeleteException;
+import com.waim.module.core.domain.project.model.error.ProjectDuplicateAliasException;
+import com.waim.module.core.domain.project.model.error.ProjectEmptyAliasException;
 import com.waim.module.core.domain.project.model.error.ProjectEmptyGroupUidException;
+import com.waim.module.core.domain.project.model.error.ProjectEmptyNameException;
 import com.waim.module.core.domain.project.model.error.ProjectEmptyUidException;
+import com.waim.module.core.domain.project.model.error.ProjectInvalidAliasException;
 import com.waim.module.core.domain.project.model.error.ProjectNotFoundException;
 import com.waim.module.core.domain.project.model.error.ProjectPermissionAlreadyExistsException;
 import com.waim.module.core.domain.project.repository.ProjectRepository;
@@ -117,42 +121,18 @@ public class ProjectService {
                 .orElseThrow(UserNotFoundException::new);
 
         if(!StringUtils.hasText(prop.getProjectName())){
-            // Empty Project Name
-            // TODO : EXCEPTION
+            throw new ProjectEmptyNameException();
         }
 
         if(!StringUtils.hasText(prop.getProjectAlias())){
-            // Empty Project Alias
-            // TODO : EXCEPTION
+            throw new ProjectEmptyAliasException();
         }
-        else if(prop.getProjectAlias().matches("^[a-z0-9-]*$")){
-            // Project Alias Rule Invalid
-            // TODO : EXCEPTION
+        else if(!prop.getProjectAlias().matches("^[a-z0-9-]+$")){
+            throw new ProjectInvalidAliasException();
         }
 
         if (!StringUtils.hasText(prop.getGroupUid())) {
             throw new ProjectEmptyGroupUidException();
-        }
-
-
-        List<ProjectEntity> matchProject = getDuplicateProject(
-                prop.getProjectName(),
-                prop.getProjectAlias(),
-            creatorUserUid
-        );
-
-        if(!matchProject.isEmpty()){
-
-            if(matchProject.stream().anyMatch(x -> x.getProjectName().equals(prop.getProjectName()))){
-                // Duplicate project name
-                // TODO : EXCEPTION
-            }
-
-            if(matchProject.stream().anyMatch(x -> x.getProjectAlias().equals(prop.getProjectAlias()))){
-                // Duplicate project alias
-                // TODO : EXCEPTION
-            }
-
         }
 
 
@@ -167,6 +147,11 @@ public class ProjectService {
 
         GroupEntity matchGroup = groupRepository.findById(prop.getGroupUid())
                 .orElseThrow(GroupNotFoundException::new);
+
+        if (projectRepository.existsByProjectAliasAndProjectGroup_Uid(prop.getProjectAlias(), matchGroup.getUid())) {
+            throw new ProjectDuplicateAliasException();
+        }
+
         insertProject.setProjectGroup(matchGroup);
 
         projectRepository.save(insertProject);
@@ -253,26 +238,6 @@ public class ProjectService {
         matchProject.get().setProjectStatus(ProjectStatus.DELETED);
 
         projectRepository.save(matchProject.get());
-    }
-
-
-
-    private List<ProjectEntity> getDuplicateProject(String projectName , String projectAlias , String ownerUid){
-        Specification<ProjectEntity> spec = (
-                (root, query, cb) -> {
-                    query.distinct(true);
-
-                    return cb.and(
-                            cb.or(
-                                    cb.equal(root.get("projectName") , projectName),
-                                    cb.equal(root.get("projectAlias") , projectAlias)
-                            ),
-                                cb.equal(root.get("projectOwner").get("uid") , ownerUid)
-                    );
-                }
-        );
-
-        return projectRepository.findAll(spec);
     }
 
     @Transactional(readOnly = true)

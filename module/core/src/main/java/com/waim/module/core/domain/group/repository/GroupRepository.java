@@ -7,7 +7,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GroupRepository extends JpaRepository<GroupEntity, String>, JpaSpecificationExecutor<GroupEntity> {
-    boolean existsByGroupAlias(String groupAlias);
+    boolean existsByGroupAliasAndParentGroupUid_Uid(String groupAlias, String parentGroupUid);
+
+    boolean existsByGroupAliasAndParentGroupUidIsNull(String groupAlias);
+
+    boolean existsByGroupAliasAndParentGroupUid_UidAndUidNot(String groupAlias, String parentGroupUid, String uid);
+
+    boolean existsByGroupAliasAndParentGroupUidIsNullAndUidNot(String groupAlias, String uid);
 
     long countByParentGroupUid_Uid(String parentGroupUid);
 }

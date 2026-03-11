@@ -41,6 +41,7 @@ public class AuthSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.PUT, "/auth").permitAll() // 로그인/갱신 허용
+                        .requestMatchers(HttpMethod.POST, "/auth/password/reset").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtSecurityFilter(jwtTokenProvider , userService), UsernamePasswordAuthenticationFilter.class)

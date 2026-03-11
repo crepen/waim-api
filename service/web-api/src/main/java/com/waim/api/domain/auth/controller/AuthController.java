@@ -1,9 +1,11 @@
 package com.waim.api.domain.auth.controller;
 
 import com.waim.api.common.model.response.BaseResponse;
+import com.waim.api.domain.auth.model.dto.request.ForgotPasswordRequest;
 import com.waim.api.domain.auth.model.dto.request.IssuanceTokenRequest;
 import com.waim.api.domain.auth.model.dto.response.GetTokenUserDataResponse;
 import com.waim.api.domain.auth.model.dto.response.JwtResponse;
+import com.waim.api.domain.auth.service.AuthPasswordResetService;
 import com.waim.module.core.domain.auth.model.data.AuthGrantType;
 import com.waim.module.core.domain.auth.model.error.AuthInvalidGrantTypeException;
 import com.waim.module.core.domain.auth.service.AuthService;
@@ -30,6 +32,7 @@ import java.util.Objects;
 public class AuthController {
 
     private final AuthService authService;
+        private final AuthPasswordResetService authPasswordResetService;
 
     @GetMapping
     @Operation(
@@ -118,6 +121,22 @@ public class AuthController {
                 BaseResponse.Success.builder()
                         .result(res)
                         .build()
+        );
+    }
+
+    @PostMapping("/password/reset")
+    @Operation(
+            summary = "비밀번호 찾기",
+            description = "등록된 이메일로 임시 비밀번호를 발송합니다.",
+            security = @SecurityRequirement(name = "")
+    )
+    public ResponseEntity<?> resetPasswordByEmail(
+            @RequestBody ForgotPasswordRequest reqBody
+    ) {
+        authPasswordResetService.resetPasswordAndSendMail(reqBody.getEmail());
+
+        return ResponseEntity.ok().body(
+                BaseResponse.Success.builder().build()
         );
     }
 }
