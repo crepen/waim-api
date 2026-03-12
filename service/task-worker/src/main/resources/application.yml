@@ -1,11 +1,35 @@
 spring:
   application:
     name: task-worker
+
   config:
     import: classpath:waim.yml
+
   datasource:
+    url: ENC(e2qyP8ShC+KwMgc5YsexM2J1Z3Zi4SQ7xcFMy3ghIahWfi17A98fFzo1KoSMzcrPLOFoMprXmGo=)
+    username: ENC(0Ev5zUmMsZDclnk4b0djxQ==)
+    password: ENC(fyWd330KZIsVjBdiUUGwY0R2/ahvG2+i)
+    driver-class-name: org.mariadb.jdbc.Driver
     hikari:
       connection-timeout: 3000
+
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.MariaDBDialect
+        jdbc:
+          time_zone: UTC
+
+  data:
+    redis:
+      connect-timeout: 2000ms
+
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
@@ -14,3 +38,15 @@ spring:
 
 server:
   port: 8083
+
+logging:
+  file:
+    name: ${log.dir:logs}/${spring.application.name}.log
+  logback:
+    rollingpolicy:
+      file-name-pattern: ${log.dir:logs}/${spring.application.name}.%d{yyyy-MM-dd}.%i.log
+      max-history: 20
+  level:
+    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: ERROR
+    root: INFO
+    com.waim: info

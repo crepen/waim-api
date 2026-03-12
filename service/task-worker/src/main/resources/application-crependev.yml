@@ -1,3 +1,39 @@
 spring:
   config:
     import: classpath:waim-crependev.yml
+
+  datasource:
+    url: ${W_DB_URL:no-url}
+    username: ${W_DB_USERNAME:no-user}
+    password: ${W_DB_PASSWORD:no-password}
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  data:
+    redis:
+      host: ${W_REDIS_HOST:no-host}
+      port: ${W_REDIS_PORT:0}
+      password: ${W_REDIS_PASSWORD:no-password}
+      connect-timeout: 5000ms
+      timeout: 3000ms
+      client-type: lettuce
+      lettuce:
+        shutdown-timeout: 500ms
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  rabbitmq:
+    host: ${W_RABBITMQ_HOST:localhost}
+    port: ${W_RABBITMQ_PORT:5672}
+    username: ${W_RABBITMQ_USERNAME:guest}
+    password: ${W_RABBITMQ_PASSWORD:guest}
+
+jasypt:
+  encryptor:
+    password: ${W_JASYPT_PASSWORD}
+
+logging:
+  level:
+    org.hibernate.orm.connections.pooling: WARN
+    org.hibernate.orm.jpa: WARN
