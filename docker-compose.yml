@@ -60,6 +60,11 @@ services:
       - W_DB_URL=${W_DB_URL}
       - W_DB_USERNAME=${W_DB_USERNAME}
       - W_DB_PASSWORD=${W_DB_PASSWORD}
+      # RABBITMQ
+      - W_RABBITMQ_HOST=${W_RABBITMQ_HOST}
+      - W_RABBITMQ_PORT=${W_RABBITMQ_PORT}
+      - W_RABBITMQ_USERNAME=${W_RABBITMQ_USERNAME}
+      - W_RABBITMQ_PASSWORD=${W_RABBITMQ_PASSWORD}
       # JASYPT
       - W_JASYPT_PASSWORD=${W_JASYPT_PASSWORD}
       # JWT & CRYPTO
@@ -80,6 +85,8 @@ services:
     depends_on:
       waim-redis:
         condition: service_healthy
+      waim-rabbitmq:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -91,6 +98,124 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+
+  waim-task-worker-1:
+    container_name: waim-task-worker-1
+    hostname: waim-task-worker-1
+    image: nexus.crepen.kro.kr/waim/task-worker
+    environment:
+      - SPRING_PROFILES_ACTIVE=${WAIM_SPRING_PROFILE:-prod}
+      - SPRING_THREADS_VIRTUAL_ENABLED=true
+      # REDIS Conn
+      - W_REDIS_HOST=${W_REDIS_HOST}
+      - W_REDIS_PORT=${W_REDIS_PORT}
+      - W_REDIS_PASSWORD=${W_REDIS_PASSWORD}
+      # DATABASE
+      - W_DB_URL=${W_DB_URL}
+      - W_DB_USERNAME=${W_DB_USERNAME}
+      - W_DB_PASSWORD=${W_DB_PASSWORD}
+      # RABBITMQ
+      - W_RABBITMQ_HOST=${W_RABBITMQ_HOST}
+      - W_RABBITMQ_PORT=${W_RABBITMQ_PORT}
+      - W_RABBITMQ_USERNAME=${W_RABBITMQ_USERNAME}
+      - W_RABBITMQ_PASSWORD=${W_RABBITMQ_PASSWORD}
+      # JASYPT
+      - W_JASYPT_PASSWORD=${W_JASYPT_PASSWORD}
+      # JWT & CRYPTO
+      - W_JWT_SECRET=${W_JWT_SECRET}
+      - W_CRYPTO_KEY=${W_CRYPTO_KEY}
+      - W_CRYPTO_SALT=${W_CRYPTO_SALT}
+    volumes:
+      - ${WAIM_TASK_WORKER_1_VOLUME_LOG:-/app/docker/volume/waim/task-worker-1/logs}:/application/logs
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - crepen-waim-network
+      - crepen-mariadb-network
+    depends_on:
+      waim-redis:
+        condition: service_healthy
+      waim-rabbitmq:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+
+  waim-task-worker-2:
+    container_name: waim-task-worker-2
+    hostname: waim-task-worker-2
+    image: nexus.crepen.kro.kr/waim/task-worker
+    environment:
+      - SPRING_PROFILES_ACTIVE=${WAIM_SPRING_PROFILE:-prod}
+      - SPRING_THREADS_VIRTUAL_ENABLED=true
+      # REDIS Conn
+      - W_REDIS_HOST=${W_REDIS_HOST}
+      - W_REDIS_PORT=${W_REDIS_PORT}
+      - W_REDIS_PASSWORD=${W_REDIS_PASSWORD}
+      # DATABASE
+      - W_DB_URL=${W_DB_URL}
+      - W_DB_USERNAME=${W_DB_USERNAME}
+      - W_DB_PASSWORD=${W_DB_PASSWORD}
+      # RABBITMQ
+      - W_RABBITMQ_HOST=${W_RABBITMQ_HOST}
+      - W_RABBITMQ_PORT=${W_RABBITMQ_PORT}
+      - W_RABBITMQ_USERNAME=${W_RABBITMQ_USERNAME}
+      - W_RABBITMQ_PASSWORD=${W_RABBITMQ_PASSWORD}
+      # JASYPT
+      - W_JASYPT_PASSWORD=${W_JASYPT_PASSWORD}
+      # JWT & CRYPTO
+      - W_JWT_SECRET=${W_JWT_SECRET}
+      - W_CRYPTO_KEY=${W_CRYPTO_KEY}
+      - W_CRYPTO_SALT=${W_CRYPTO_SALT}
+    volumes:
+      - ${WAIM_TASK_WORKER_2_VOLUME_LOG:-/app/docker/volume/waim/task-worker-2/logs}:/application/logs
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - crepen-waim-network
+      - crepen-mariadb-network
+    depends_on:
+      waim-redis:
+        condition: service_healthy
+      waim-rabbitmq:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+
+  waim-rabbitmq:
+    image: rabbitmq:4-management
+    container_name: waim-rabbitmq
+    hostname: waim-rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=${W_RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${W_RABBITMQ_PASSWORD}
+    ports:
+      - "${W_RABBITMQ_PORT:-5672}:5672"
+      - "${W_RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - ${WAIM_RABBITMQ_VOLUME_DATA:-/app/docker/volume/waim/rabbitmq/data}:/var/lib/rabbitmq
+    networks:
+      - crepen-waim-network
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
 
 

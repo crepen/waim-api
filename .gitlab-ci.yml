@@ -1,6 +1,7 @@
 variables:
   WAIM_NEXUS_API_IMAGE: $CREPEN_NEXUS_REPO/waim/api
   WAIM_NEXUS_SCH_IMAGE:  $CREPEN_NEXUS_REPO/waim/scheduler
+  WAIM_NEXUS_TWK_IMAGE:  $CREPEN_NEXUS_REPO/waim/task-worker
 
 stages:
   - build
@@ -48,6 +49,23 @@ image-schedule:
    # CLEAN UP IMAGE
    - echo "Cleaning up SHA-tagged image from host..."
    - docker rmi $WAIM_NEXUS_SCH_IMAGE:$CI_COMMIT_SHORT_SHA
+ only:
+   - master
+
+image-task-worker:
+ stage: build
+ script:
+   - echo "Building Task Worker Docker Image..."
+   - >
+     docker build
+     -t $WAIM_NEXUS_TWK_IMAGE:$CI_COMMIT_SHORT_SHA
+     -t $WAIM_NEXUS_TWK_IMAGE:latest
+     -f service/task-worker/Dockerfile .
+   - echo "Pushing Image to Nexus...."
+   - docker push $WAIM_NEXUS_TWK_IMAGE:$CI_COMMIT_SHORT_SHA
+   - docker push $WAIM_NEXUS_TWK_IMAGE:latest
+   - echo "Cleaning up SHA-tagged image from host..."
+   - docker rmi $WAIM_NEXUS_TWK_IMAGE:$CI_COMMIT_SHORT_SHA
  only:
    - master
 
