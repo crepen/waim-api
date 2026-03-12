@@ -195,57 +195,6 @@ services:
           cpus: '1.0'
           memory: 2G
 
-  waim-rabbitmq:
-    image: rabbitmq:4-management
-    container_name: waim-rabbitmq
-    hostname: waim-rabbitmq
-    restart: always
-    environment:
-      - RABBITMQ_DEFAULT_USER=${W_RABBITMQ_USERNAME}
-      - RABBITMQ_DEFAULT_PASS=${W_RABBITMQ_PASSWORD}
-    ports:
-      - "${W_RABBITMQ_PORT:-5672}:5672"
-      - "${W_RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
-    volumes:
-      - ${WAIM_RABBITMQ_VOLUME_DATA:-/app/docker/volume/waim/rabbitmq/data}:/var/lib/rabbitmq
-    networks:
-      - crepen-waim-network
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-
-
-
-  waim-redis:
-    image: valkey/valkey:9
-    container_name: waim-redis
-    hostname: waim-redis
-    restart: always
-    # 설정 파일을 먼저 읽고, 비밀번호는 환경 변수를 통해 커맨드 라인에서 덮어씌웁니다.
-    command: [
-      "valkey-server",
-      "/usr/local/etc/valkey/valkey.conf",
-      "--requirepass", "${W_REDIS_PASSWORD}",
-      "--dbfilename", "dump_waim.rdb"
-    ]
-    environment:
-      - REDIS_PASSWORD=${W_REDIS_PASSWORD}
-    networks:
-      - crepen-waim-network
-    volumes:
-      - ${WAIM_REDIS_VOLUME_DATA:-/app/docker/volume/waim/redis/data}:/data
-      - ${WAIM_REDIS_VOLUME_CONF:-/app/docker/volume/waim/redis/conf/redis.conf}:/usr/local/etc/valkey/valkey.conf
-    healthcheck:
-      # valkey-cli를 사용하여 헬스체크 진행
-      test: [ "CMD-SHELL", "valkey-cli -a \"$$REDIS_PASSWORD\" ping | grep PONG" ]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
-
 networks:
   crepen-waim-network:
     name: crepen-waim-network
