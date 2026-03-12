@@ -30,9 +30,6 @@ services:
     networks:
       - crepen-waim-network
       - crepen-mariadb-network
-    depends_on:
-      waim-redis:
-        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -82,11 +79,6 @@ services:
     networks:
       - crepen-waim-network
       - crepen-mariadb-network
-    depends_on:
-      waim-redis:
-        condition: service_healthy
-      waim-rabbitmq:
-        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -184,11 +176,6 @@ services:
     networks:
       - crepen-waim-network
       - crepen-mariadb-network
-    depends_on:
-      waim-redis:
-        condition: service_healthy
-      waim-rabbitmq:
-        condition: service_healthy
     deploy:
       resources:
         limits:
