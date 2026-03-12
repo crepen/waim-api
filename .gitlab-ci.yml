@@ -32,24 +32,24 @@ image-api:
   only:
     - master
 
-#image-schedule:
-#  stage: build
-#  script:
-#    - echo "Building Scheduler Docker Image..."
-#    - >
-#      docker build
-#      -t $WAIM_NEXUS_SCH_IMAGE:$CI_COMMIT_SHORT_SHA
-#      -t $WAIM_NEXUS_SCH_IMAGE:latest
-#      -f service/waim-scheduler/Dockerfile .
-#    # PUSH IMAGE
-#    - echo "Pushing Image to Nexus...."
-#    - docker push $WAIM_NEXUS_SCH_IMAGE:$CI_COMMIT_SHORT_SHA
-#    - docker push $WAIM_NEXUS_SCH_IMAGE:latest
-#    # CLEAN UP IMAGE
-#    - echo "Cleaning up SHA-tagged image from host..."
-#    - docker rmi $WAIM_NEXUS_SCH_IMAGE:$CI_COMMIT_SHORT_SHA
-#  only:
-#    - master
+image-schedule:
+ stage: build
+ script:
+   - echo "Building Scheduler Docker Image..."
+   - >
+     docker build
+     -t $WAIM_NEXUS_SCH_IMAGE:$CI_COMMIT_SHORT_SHA
+     -t $WAIM_NEXUS_SCH_IMAGE:latest
+     -f service/waim-scheduler/Dockerfile .
+   # PUSH IMAGE
+   - echo "Pushing Image to Nexus...."
+   - docker push $WAIM_NEXUS_SCH_IMAGE:$CI_COMMIT_SHORT_SHA
+   - docker push $WAIM_NEXUS_SCH_IMAGE:latest
+   # CLEAN UP IMAGE
+   - echo "Cleaning up SHA-tagged image from host..."
+   - docker rmi $WAIM_NEXUS_SCH_IMAGE:$CI_COMMIT_SHORT_SHA
+ only:
+   - master
 
 deploy-container:
   stage: deploy
@@ -67,7 +67,7 @@ sync-to-github:
   stage: sync
   script:
     - git remote remove github || true
-    - git remote add github https://project_settings:$GITHUB_WAIM_API_TOKEN@$GITHUB_WAIM_API_REPO
+    - git remote add github https://oauth2:$GITHUB_WAIM_API_TOKEN@$GITHUB_WAIM_API_REPO
     - git push github HEAD:$CI_COMMIT_REF_NAME --force
   only:
     - master
