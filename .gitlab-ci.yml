@@ -67,7 +67,7 @@ sync-to-github:
   stage: sync
   script:
     - git remote remove github || true
-    - git remote add github https://project_settings:$GITHUB_WAIM_API_TOKEN@$GITHUB_WAIM_API_REPO
+    - git remote add github https://oauth2:$GITHUB_WAIM_API_TOKEN@$GITHUB_WAIM_API_REPO
     - git push github HEAD:$CI_COMMIT_REF_NAME --force
   only:
     - master
